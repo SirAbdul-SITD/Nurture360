@@ -1,0 +1,601 @@
+/* Rinda School Management System - Login Page Styles */
+/* Exact design matching the image specification */
+
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    /* background: linear-gradient(135deg, #e9d5ff 0%, #c4b5fd 100%); */
+    /* height: 100vh; */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Main container */
+.login-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+/* Left Section - Login Form */
+.login-form-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: #ffffff;
+    position: relative;
+    overflow: hidden;
+    border-right: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+/* Curved purple shape extending from background */
+.login-form-section::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: -50px;
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(135deg, var(--theme-primary, #8b5cf6) 0%, var(--theme-secondary, #290c5c) 100%);
+    border-radius: 50%;
+    opacity: 0.1;
+    z-index: 1;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 380px;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.1);
+    position: relative;
+    z-index: 2;
+    margin-bottom: 1rem;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.login-header h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+}
+
+.subtitle {
+    font-size: 0.95rem;
+    color: #6b7280;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+/* Form styles */
+.login-form {
+    margin-bottom: 0;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    color: #9ca3af;
+    font-size: 1.1rem;
+    z-index: 2;
+    transition: color 0.3s ease;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 16px 16px 16px 48px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1a1a1a;
+    background: #f9fafb;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.input-wrapper input::placeholder {
+    color: #9ca3af;
+    font-weight: 400;
+}
+
+.input-wrapper input:focus {
+    border-color: #8b5cf6;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.input-wrapper input:focus + .input-icon {
+    color: #8b5cf6;
+}
+
+/* Button styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+    color: #ffffff;
+    width: 100%;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.btn-loader {
+    display: none;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Right Section - Illustration */
+.illustration-section {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, #8b5cf6 0%, #290c5c 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Logo/App Name Section */
+.logo-section {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-image {
+    height: 40px;
+    width: auto;
+    filter: none; /* show original colors */
+    opacity: 1;
+}
+
+.app-name {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    opacity: 0.9;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Wavy background patterns */
+.illustration-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255,255,255,0.05) 0%, transparent 50%);
+}
+
+.illustration-card {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+.illustration-image {
+    width: auto;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+    margin: 0 auto 1.5rem;
+}
+
+.student-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+ 
+}
+
+/* Commented out illustration frame styles */
+/*
+.illustration-frame {
+    width: 280px;
+    height: 360px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(15px);
+    margin: 0 auto 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.illustration-frame::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+    animation: shimmer 3s ease-in-out infinite;
+}
+*/
+
+.decoration-element {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+    background: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.decoration-element i {
+    font-size: 1.25rem;
+    color: #f59e0b;
+}
+
+/* Footer */
+.login-footer { display: none !important; }
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+}
+
+.designer-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.designer-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.designer-avatar {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 1rem;
+}
+
+.designer-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.designer-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #4c1d95;
+}
+
+.designer-handle {
+    font-size: 0.65rem;
+    color: #7c3aed;
+}
+
+.designer-contact {
+    font-size: 0.75rem;
+    color: #7c3aed;
+    font-weight: 500;
+}
+
+/* Alert styles */
+.alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.875rem;
+    border-radius: 12px;
+    margin-bottom: 1.25rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.alert-error {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.alert i {
+    font-size: 1rem;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+    .login-container {
+        flex-direction: column;
+    }
+    
+    .login-form-section {
+        flex-direction: column;
+        justify-content: flex-start;
+        padding-top: 2rem;
+        padding-bottom: 1rem;
+    }
+    
+    .login-card {
+        margin-bottom: 1rem;
+    }
+    
+    .illustration-section {
+        min-height: 250px;
+        padding: 1rem;
+    }
+    
+    .logo-section {
+        top: 1rem;
+        right: 1rem;
+    }
+    
+    .logo-image {
+        height: 32px;
+        filter: none;
+    }
+    
+    .app-name {
+        font-size: 1.25rem;
+    }
+    
+    .illustration-image {
+        width: 220px;
+        height: 280px;
+    }
+    
+    .student-image {
+        border-radius: 16px;
+    }
+    
+    .login-footer {
+        margin-top: 0;
+        border-top: none;
+        border-left: 3px solid rgba(139, 92, 246, 0.2);
+        border-radius: 0 12px 12px 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .login-form-section {
+        padding: 1.5rem;
+    }
+    
+    .login-card {
+        padding: 1.75rem;
+        max-width: 100%;
+    }
+    
+    .login-header h1 {
+        font-size: 2rem;
+    }
+    
+    .logo-section {
+        top: 1rem;
+        right: 1rem;
+    }
+    
+    .logo-image {
+        height: 28px;
+        filter: none;
+    }
+    
+    .app-name {
+        font-size: 1.1rem;
+    }
+    
+    .illustration-image {
+        width: 180px;
+        height: 220px;
+    }
+    
+    .student-image {
+        border-radius: 14px;
+    }
+    
+    .footer-content {
+        flex-direction: column;
+        gap: 0.75rem;
+        text-align: center;
+    }
+    
+    .designer-info {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-card {
+        padding: 1.5rem;
+    }
+    
+    .login-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .subtitle {
+        font-size: 0.875rem;
+    }
+    
+    .input-wrapper input {
+        padding: 14px 14px 14px 44px;
+        font-size: 0.875rem;
+    }
+    
+    .btn {
+        padding: 14px 20px;
+        font-size: 0.875rem;
+    }
+    
+    .logo-section {
+        top: 0.75rem;
+        right: 0.75rem;
+    }
+    
+    .logo-image {
+        height: 24px;
+    }
+    
+    .app-name {
+        font-size: 1rem;
+    }
+    
+    .illustration-image {
+        width: 160px;
+        height: 200px;
+    }
+    
+    .student-image {
+        border-radius: 12px;
+    }
+    
+    .login-footer {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* Animation classes */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.login-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.illustration-card {
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+/* Hover effects */
+.input-wrapper input:hover {
+    border-color: #d1d5db;
+    background: #f3f4f6;
+}
+
+/* Focus states */
+.input-wrapper input:focus {
+    transform: translateY(-1px);
+}
+
+/* Loading state */
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+} 

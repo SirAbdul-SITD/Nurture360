@@ -1,0 +1,115 @@
+[24-Aug-2023 22:31:51 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[24-Aug-2023 22:36:47 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[24-Aug-2023 22:37:44 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[24-Aug-2023 22:38:24 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[24-Aug-2023 22:38:51 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[24-Aug-2023 22:44:54 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[24-Aug-2023 23:34:28 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[25-Aug-2023 01:05:08 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[25-Aug-2023 04:54:26 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[25-Aug-2023 05:06:13 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[25-Aug-2023 05:12:03 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[25-Aug-2023 06:59:59 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[25-Aug-2023 07:11:14 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[25-Aug-2023 09:06:18 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[25-Aug-2023 11:18:46 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[25-Aug-2023 12:31:56 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[25-Aug-2023 13:59:49 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[25-Aug-2023 14:08:13 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[25-Aug-2023 15:44:38 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[25-Aug-2023 16:31:40 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[26-Aug-2023 01:37:00 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[26-Aug-2023 10:56:49 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[26-Aug-2023 11:26:24 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[26-Aug-2023 15:19:54 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[26-Aug-2023 22:47:03 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[26-Aug-2023 22:47:34 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/mytvglow/virasub.demo.edurelm.site/users/auth/index.php on line 37
+[27-Aug-2023 13:01:57 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'abdulkarimhussain77@gmail.com' for key 'email' in /home/mytvglow/virasub.demo.edurelm.site/users/auth/signup.php:42
+Stack trace:
+#0 /home/mytvglow/virasub.demo.edurelm.site/users/auth/signup.php(42): PDOStatement->execute()
+#1 {main}
+  thrown in /home/mytvglow/virasub.demo.edurelm.site/users/auth/signup.php on line 42
+[27-Aug-2023 13:02:59 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'abdulkarimhussain77@gmail.com' for key 'email' in /home/mytvglow/virasub.demo.edurelm.site/users/auth/signup.php:44
+Stack trace:
+#0 /home/mytvglow/virasub.demo.edurelm.site/users/auth/signup.php(44): PDOStatement->execute()
+#1 {main}
+  thrown in /home/mytvglow/virasub.demo.edurelm.site/users/auth/signup.php on line 44
+[21-May-2025 09:34:17 UTC] PHP Warning:  Undefined variable $pdo in /home/stradafr/dashboard.nurture360.com.ng/auth/index.php on line 30
+[21-May-2025 09:34:17 UTC] PHP Fatal error:  Uncaught Error: Call to a member function prepare() on null in /home/stradafr/dashboard.nurture360.com.ng/auth/index.php:30
+Stack trace:
+#0 {main}
+  thrown in /home/stradafr/dashboard.nurture360.com.ng/auth/index.php on line 30
+[21-May-2025 09:34:21 UTC] PHP Warning:  Undefined variable $pdo in /home/stradafr/dashboard.nurture360.com.ng/auth/index.php on line 30
+[21-May-2025 09:34:21 UTC] PHP Fatal error:  Uncaught Error: Call to a member function prepare() on null in /home/stradafr/dashboard.nurture360.com.ng/auth/index.php:30
+Stack trace:
+#0 {main}
+  thrown in /home/stradafr/dashboard.nurture360.com.ng/auth/index.php on line 30
+[21-May-2025 11:18:23 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
+[21-May-2025 11:18:23 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'class_id' cannot be null in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php:43
+Stack trace:
+#0 /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php(43): PDOStatement->execute()
+#1 {main}
+  thrown in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 43
+[21-May-2025 11:18:36 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
+[21-May-2025 11:18:36 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'class_id' cannot be null in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php:43
+Stack trace:
+#0 /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php(43): PDOStatement->execute()
+#1 {main}
+  thrown in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 43
+[21-May-2025 21:32:40 UTC] PHP Warning:  Undefined array key "status" in /home/stradafr/dashboard.nurture360.com.ng/auth/send_otp.php on line 38
+[08-Jul-2025 14:36:17 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
+[08-Jul-2025 14:36:17 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'class_id' cannot be null in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php:43
+Stack trace:
+#0 /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php(43): PDOStatement->execute()
+#1 {main}
+  thrown in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 43
+[08-Jul-2025 14:36:28 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
+[08-Jul-2025 14:36:28 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'class_id' cannot be null in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php:43
+Stack trace:
+#0 /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php(43): PDOStatement->execute()
+#1 {main}
+  thrown in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 43
+[10-Jul-2025 07:50:19 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
+[16-Jul-2025 10:55:34 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
+[16-Jul-2025 11:11:19 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
+[16-Jul-2025 11:11:19 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'class_id' cannot be null in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php:43
+Stack trace:
+#0 /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php(43): PDOStatement->execute()
+#1 {main}
+  thrown in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 43
+[16-Jul-2025 11:11:19 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
+[16-Jul-2025 11:11:19 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'class_id' cannot be null in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php:43
+Stack trace:
+#0 /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php(43): PDOStatement->execute()
+#1 {main}
+  thrown in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 43
+[16-Jul-2025 11:11:19 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
+[16-Jul-2025 11:11:19 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'class_id' cannot be null in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php:43
+Stack trace:
+#0 /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php(43): PDOStatement->execute()
+#1 {main}
+  thrown in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 43
+[16-Jul-2025 11:11:19 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
+[16-Jul-2025 11:11:19 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'class_id' cannot be null in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php:43
+Stack trace:
+#0 /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php(43): PDOStatement->execute()
+#1 {main}
+  thrown in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 43
+[16-Jul-2025 11:11:19 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
+[16-Jul-2025 11:11:19 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'class_id' cannot be null in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php:43
+Stack trace:
+#0 /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php(43): PDOStatement->execute()
+#1 {main}
+  thrown in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 43
+[16-Jul-2025 11:11:19 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
+[16-Jul-2025 11:11:20 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'class_id' cannot be null in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php:43
+Stack trace:
+#0 /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php(43): PDOStatement->execute()
+#1 {main}
+  thrown in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 43
+[17-Jul-2025 09:57:27 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
+[17-Jul-2025 09:58:23 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
+[17-Jul-2025 10:30:03 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
+[17-Jul-2025 10:30:03 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
+[17-Jul-2025 10:30:03 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
+[20-Aug-2025 02:20:51 UTC] PHP Warning:  Undefined array key "class_id" in /home/stradafr/dashboard.nurture360.com.ng/auth/signup.php on line 13
