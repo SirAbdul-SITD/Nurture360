@@ -50,7 +50,7 @@ include '../components/header.php';
         <button class="btn btn-primary" type="button" data-open-modal="createNotification"><i class="fas fa-plus"></i> Create</button>
       </div>
     </div>
-
+<!-- 
     <div class="content-card compact">
       <div class="card-content">
         <form class="form" method="GET" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
@@ -88,7 +88,7 @@ include '../components/header.php';
           </div>
         </form>
       </div>
-    </div>
+    </div> -->
 
     <div class="content-card">
       <div class="card-header">

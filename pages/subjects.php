@@ -28,26 +28,53 @@ try {
         $action = $_POST['action'] ?? '';
         if ($action === 'create') {
             $name = trim($_POST['subject_name'] ?? '');
-            $code = trim($_POST['subject_code'] ?? '');
-            $credits = (int)($_POST['credits'] ?? 1);
-            $description = trim($_POST['description'] ?? '');
-            $is_active = isset($_POST['is_active']) ? 1 : 1; // default active
+            $class_id = (int)($_POST['class_id'] ?? 0);
+            $credits = 1; // fixed default
+            $description = '';
+            $is_active = 1; // always active by default
             if ($name === '') throw new Exception('Subject name is required');
-            if ($code === '') { $code = generateUniqueSubjectCode($pdo); }
+            $code = generateUniqueSubjectCode($pdo);
             $stmt = $pdo->prepare("INSERT INTO subjects (subject_name, subject_code, description, credits, is_active) VALUES (?, ?, ?, ?, ?)");
             $stmt->execute([$name, $code, $description, $credits, $is_active]);
+            $newSubjectId = (int)$pdo->lastInsertId();
+            // Optionally assign to a class if provided
+            if ($class_id > 0) {
+                // Validate class exists and active
+                $chk = $pdo->prepare("SELECT id FROM classes WHERE id = ? AND is_active = 1");
+                $chk->execute([$class_id]);
+                if ($chk->fetchColumn()) {
+                    // Insert link if not exists
+                    $dup = $pdo->prepare('SELECT id FROM class_subjects WHERE class_id = ? AND subject_id = ?');
+                    $dup->execute([$class_id, $newSubjectId]);
+                    if (!$dup->fetchColumn()) {
+                        $ins = $pdo->prepare('INSERT INTO class_subjects (class_id, subject_id) VALUES (?, ?)');
+                        $ins->execute([$class_id, $newSubjectId]);
+                    }
+                }
+            }
             $message = 'Subject created successfully';
         } elseif ($action === 'update') {
             $id = (int)($_POST['id'] ?? 0);
             if ($id <= 0) throw new Exception('Invalid subject ID');
             $name = trim($_POST['subject_name'] ?? '');
-            $code = trim($_POST['subject_code'] ?? '');
-            $credits = (int)($_POST['credits'] ?? 1);
-            $description = trim($_POST['description'] ?? '');
-            $is_active = isset($_POST['is_active']) ? 1 : 0;
-            if ($name === '' || $code === '') throw new Exception('Name and code are required');
-            $stmt = $pdo->prepare("UPDATE subjects SET subject_name=?, subject_code=?, description=?, credits=?, is_active=? WHERE id=?");
-            $stmt->execute([$name, $code, $description, $credits, $is_active, $id]);
+            $class_id = (int)($_POST['class_id'] ?? 0);
+            if ($name === '') throw new Exception('Subject name is required');
+            // Only update the name; keep other fields unchanged
+            $stmt = $pdo->prepare("UPDATE subjects SET subject_name=? WHERE id=?");
+            $stmt->execute([$name, $id]);
+            // Ensure assignment to selected class if provided
+            if ($class_id > 0) {
+                $chk = $pdo->prepare("SELECT id FROM classes WHERE id = ? AND is_active = 1");
+                $chk->execute([$class_id]);
+                if ($chk->fetchColumn()) {
+                    $dup = $pdo->prepare('SELECT id FROM class_subjects WHERE class_id = ? AND subject_id = ?');
+                    $dup->execute([$class_id, $id]);
+                    if (!$dup->fetchColumn()) {
+                        $ins = $pdo->prepare('INSERT INTO class_subjects (class_id, subject_id) VALUES (?, ?)');
+                        $ins->execute([$class_id, $id]);
+                    }
+                }
+            }
             $message = 'Subject updated successfully';
         } elseif ($action === 'delete') {
             $id = (int)($_POST['id'] ?? 0);
@@ -64,6 +91,12 @@ try {
 // Fetch subjects
 $stmt = $pdo->query("SELECT * FROM subjects ORDER BY subject_name");
 $subjects = $stmt->fetchAll();
+
+// Fetch active classes for dropdowns
+try {
+    $clsStmt = $pdo->query("SELECT id, class_name, grade_level, academic_year FROM classes WHERE is_active = 1 ORDER BY grade_level, class_name");
+    $classes = $clsStmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Throwable $e) { $classes = []; }
 
 include '../components/header.php';
 ?>
@@ -140,27 +173,20 @@ $createSubjectForm = '
       <input type="text" name="subject_name" required placeholder="e.g., Mathematics">
     </div>
     <div class="form-group">
-      <label>Subject Code</label>
-      <input type="text" name="subject_code" placeholder="Auto if blank">
+      <label>Class</label>
+      <select name="class_id">
+        <option value="">Select class (optional)</option>
+        ' . implode("\n", array_map(function($c){
+            $label = ($c['class_name'] ?? 'Class') . ' · Grade ' . (int)($c['grade_level'] ?? 0) . ' · AY ' . htmlspecialchars($c['academic_year'] ?? '', ENT_QUOTES);
+            return '<option value="' . (int)$c['id'] . '">' . htmlspecialchars($label, ENT_QUOTES) . '</option>';
+        }, $classes ?? [])) . '
+      </select>
     </div>
-  </div>
-  <div class="form-row">
-    <div class="form-group">
-      <label>Credits</label>
-      <input type="number" name="credits" min="1" value="1">
-    </div>
-    <div class="form-group" style="align-self:end;">
-      <label><input type="checkbox" name="is_active" checked> Active</label>
-    </div>
-  </div>
-  <div class="form-group">
-    <label>Description</label>
-    <textarea name="description" placeholder="Optional notes..."></textarea>
   </div>
 </form>';
 
 renderFormModal('createSubjectModal', 'Create Subject', $createSubjectForm, 'Create', 'Cancel', [
-  'size' => 'large',
+  'size' => 'medium',
   'formId' => 'createSubjectForm'
 ]);
 
@@ -175,27 +201,20 @@ $editSubjectForm = '
       <input type="text" name="subject_name" id="edit_subject_name" required>
     </div>
     <div class="form-group">
-      <label>Subject Code *</label>
-      <input type="text" name="subject_code" id="edit_subject_code" required>
+      <label>Class</label>
+      <select name="class_id" id="edit_class_id">
+        <option value="">Select class (optional)</option>
+        ' . implode("\n", array_map(function($c){
+            $label = ($c['class_name'] ?? 'Class') . ' · Grade ' . (int)($c['grade_level'] ?? 0) . ' · AY ' . htmlspecialchars($c['academic_year'] ?? '', ENT_QUOTES);
+            return '<option value="' . (int)$c['id'] . '">' . htmlspecialchars($label, ENT_QUOTES) . '</option>';
+        }, $classes ?? [])) . '
+      </select>
     </div>
-  </div>
-  <div class="form-row">
-    <div class="form-group">
-      <label>Credits</label>
-      <input type="number" name="credits" id="edit_credits" min="1" value="1">
-    </div>
-    <div class="form-group" style="align-self:end;">
-      <label><input type="checkbox" name="is_active" id="edit_is_active"> Active</label>
-    </div>
-  </div>
-  <div class="form-group">
-    <label>Description</label>
-    <textarea name="description" id="edit_description"></textarea>
   </div>
 </form>';
 
 renderFormModal('editSubjectModal', 'Edit Subject', $editSubjectForm, 'Save', 'Cancel', [
-  'size' => 'large',
+  'size' => 'medium',
   'formId' => 'editSubjectForm'
 ]);
 ?>
@@ -220,10 +239,7 @@ function submitCreateSubject(){ const f=document.getElementById('createSubjectFo
 function openEditSubjectModal(id, data){
   document.getElementById('edit_subject_id').value = id;
   document.getElementById('edit_subject_name').value = data.subject_name || '';
-  document.getElementById('edit_subject_code').value = data.subject_code || '';
-  document.getElementById('edit_credits').value = data.credits || 1;
-  document.getElementById('edit_description').value = data.description || '';
-  document.getElementById('edit_is_active').checked = !!Number(data.is_active || 0);
+  // Class assignment is optional and not prefilled (subject may belong to multiple classes)
   if (typeof window.openModalEditSubjectModal==='function') { window.openModalEditSubjectModal(); }
   else { const m=document.getElementById('editSubjectModal'); if(m){ m.classList.add('show','active'); document.body.classList.add('modal-open'); } }
 }

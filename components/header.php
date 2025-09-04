@@ -157,8 +157,19 @@ if (!empty($profile_image)) {
 
         /* App name styling */
         .logo h1 { font-size: 1.8rem; }
+        .desktop-toggle { display: none; margin-left: 8px; }
+        /* Show mobile hamburger (existing) only on mobile/tablet */
+        #sidebarToggle { display: inline-flex; }
         @media (max-width: 768px) {
             .logo h1 { font-size: 0.9rem; }
+        }
+        /* Desktop rules */
+        @media (min-width: 1025px) {
+            /* Hide the left-most hamburger on desktop */
+            #sidebarToggle { display: none; }
+            /* Show desktop toggle next to app name */
+            .desktop-toggle { display: inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border:none; background:transparent; cursor:pointer; color: var(--text-color); }
+            .desktop-toggle i { font-size: 1rem; }
         }
     </style>
 </head>
@@ -181,8 +192,12 @@ if (!empty($profile_image)) {
                     <img src="<?php echo $logo_url; ?>" alt="Logo">
                 <?php endif; ?>
                 <?php if ($showName): ?>
-                    <h1 style="margin-left: 8px; display:inline-block;"><?php echo htmlspecialchars($app_name); ?></h1>
+                    <h1 style="margin-left: 8px; display:inline-block;">&nbsp;<?php echo htmlspecialchars($app_name); ?></h1>
                 <?php endif; ?>
+                <!-- Desktop hamburger toggle (shown only on desktop) -->
+                <button class="desktop-toggle" id="desktopSidebarToggle" title="Toggle sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
         </div>
         
@@ -381,6 +396,7 @@ if (!empty($profile_image)) {
             const sidebarToggle = document.getElementById('sidebarToggle');
             const sidebar = document.querySelector('.sidebar');
             const logoToggle = document.querySelector('.logo');
+            const desktopSidebarToggle = document.getElementById('desktopSidebarToggle');
             
             console.log('Sidebar toggle element:', sidebarToggle);
             console.log('Sidebar element:', sidebar);
@@ -416,12 +432,33 @@ if (!empty($profile_image)) {
                         console.log('Desktop mode - toggling collapsed class');
                         sidebar.classList.toggle('collapsed');
                         document.body.classList.toggle('sidebar-collapsed');
+                        try {
+                            const isCollapsed = sidebar.classList.contains('collapsed');
+                            localStorage.setItem('sidebarCollapsed', isCollapsed ? 'true' : 'false');
+                        } catch (_) { /* ignore */ }
                     }
                 });
             } else {
                 console.error('Logo toggle or sidebar not found!');
                 console.error('logoToggle:', logoToggle);
                 console.error('sidebar:', sidebar);
+            }
+
+            // Desktop hamburger toggle (next to app name)
+            if (desktopSidebarToggle && sidebar) {
+                desktopSidebarToggle.addEventListener('click', function(e) {
+                    // Prevent bubbling to the .logo click handler which would toggle twice
+                    e.stopPropagation();
+                    // Match app name behavior: only handle desktop sidebar toggle (>1024px)
+                    if (window.innerWidth > 1024) {
+                        sidebar.classList.toggle('collapsed');
+                        document.body.classList.toggle('sidebar-collapsed');
+                        try {
+                            const isCollapsed = sidebar.classList.contains('collapsed');
+                            localStorage.setItem('sidebarCollapsed', isCollapsed ? 'true' : 'false');
+                        } catch (_) { /* ignore */ }
+                    }
+                });
             }
             
             // User dropdown

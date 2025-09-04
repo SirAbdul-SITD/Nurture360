@@ -61,6 +61,16 @@ try {
     $pdo = getDBConnection();
     ensureStudentProfilesSchema($pdo);
 
+    // Load active classes for dropdowns
+    $classes = [];
+    try {
+        $stmtClasses = $pdo->query("SELECT id, class_name, grade_level, academic_year FROM classes WHERE is_active = 1 ORDER BY grade_level, class_name");
+        $classes = $stmtClasses ? $stmtClasses->fetchAll(PDO::FETCH_ASSOC) : [];
+    } catch (Exception $e) {
+        // If classes table not available for some reason, keep empty options
+        $classes = [];
+    }
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         switch ($_POST['action']) {
             case 'add':
@@ -82,6 +92,7 @@ try {
                 $emergency_contact = sanitizeInput($_POST['emergency_contact'] ?? '');
                 $medical_notes = sanitizeInput($_POST['medical_notes'] ?? '');
                 $password = $_POST['password'];
+                $selected_class_id = (int)($_POST['class_id'] ?? 0);
 
                 // Basic validation
                 if (empty($first_name) || empty($last_name) || empty($password)) {
@@ -205,6 +216,19 @@ try {
                     $stmtP = $pdo->prepare("INSERT INTO student_profiles (user_id, gender, dob, admission_date, guardian_name, guardian_phone, previous_school, emergency_contact, medical_notes, address_line, city, state, country) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                     $stmtP->execute([$newUserId, $gender ?: null, $dob ?: null, $admission_date ?: null, $guardian_name ?: null, $guardian_phone ?: null, $previous_school ?: null, $emergency_contact ?: null, $medical_notes ?: null, $address_line ?: null, $city ?: null, $state ?: null, $country ?: null]);
 
+                    // Optional: create enrollment if a class was selected
+                    if ($selected_class_id > 0) {
+                        $stmtC = $pdo->prepare("SELECT academic_year FROM classes WHERE id = ?");
+                        $stmtC->execute([$selected_class_id]);
+                        if ($rowC = $stmtC->fetch(PDO::FETCH_ASSOC)) {
+                            $ay = $rowC['academic_year'];
+                            // Deactivate any existing active enrollment just in case
+                            $pdo->prepare("UPDATE student_enrollments SET status='inactive' WHERE student_id = ? AND status = 'active'")->execute([$newUserId]);
+                            $stmtEn = $pdo->prepare("INSERT INTO student_enrollments (student_id, class_id, academic_year, enrollment_date, status) VALUES (?, ?, ?, ?, 'active')");
+                            $stmtEn->execute([$newUserId, $selected_class_id, $ay, date('Y-m-d')]);
+                        }
+                    }
+
                     $pdo->commit();
                     $message = 'Student added successfully! Student ID: ' . $student_id_username;
                     $action = 'list';
@@ -232,6 +256,7 @@ try {
                 $country = sanitizeInput($_POST['country'] ?? '');
                 $emergency_contact = sanitizeInput($_POST['emergency_contact'] ?? '');
                 $medical_notes = sanitizeInput($_POST['medical_notes'] ?? '');
+                $selected_class_id = (int)($_POST['class_id'] ?? 0);
 
                 $profile_image_url = null;
                 $uploadAttempted = false;
@@ -304,6 +329,27 @@ try {
                         $stmtP = $pdo->prepare("INSERT INTO student_profiles (user_id, gender, dob, admission_date, guardian_name, guardian_phone, previous_school, emergency_contact, medical_notes, address_line, city, state, country) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                         $stmtP->execute([$id, $gender ?: null, $dob ?: null, $admission_date ?: null, $guardian_name ?: null, $guardian_phone ?: null, $previous_school ?: null, $emergency_contact ?: null, $medical_notes ?: null, $address_line ?: null, $city ?: null, $state ?: null, $country ?: null]);
                     }
+
+                    // If a class was selected, update the student's active enrollment
+                    if ($selected_class_id > 0) {
+                        // Find current active class
+                        $stmtCur = $pdo->prepare("SELECT class_id FROM student_enrollments WHERE student_id = ? AND status = 'active' ORDER BY id DESC LIMIT 1");
+                        $stmtCur->execute([$id]);
+                        $cur = $stmtCur->fetch(PDO::FETCH_ASSOC);
+                        $current_class_id = $cur ? (int)$cur['class_id'] : 0;
+                        if ($current_class_id !== $selected_class_id) {
+                            // Deactivate current
+                            $pdo->prepare("UPDATE student_enrollments SET status='inactive' WHERE student_id = ? AND status='active'")->execute([$id]);
+                            // Insert new active with AY from classes
+                            $stmtC = $pdo->prepare("SELECT academic_year FROM classes WHERE id = ?");
+                            $stmtC->execute([$selected_class_id]);
+                            if ($rowC = $stmtC->fetch(PDO::FETCH_ASSOC)) {
+                                $ay = $rowC['academic_year'];
+                                $stmtEn = $pdo->prepare("INSERT INTO student_enrollments (student_id, class_id, academic_year, enrollment_date, status) VALUES (?, ?, ?, ?, 'active')");
+                                $stmtEn->execute([$id, $selected_class_id, $ay, date('Y-m-d')]);
+                            }
+                        }
+                    }
                     $pdo->commit();
                     $message = 'Student updated successfully!';
                     $action = 'list';
@@ -331,7 +377,12 @@ try {
         $stmt = $pdo->query("SELECT 
             u.id, u.username, u.email, u.first_name, u.last_name, u.phone, u.address, u.profile_image, u.created_at, u.is_active,
             sp.gender, sp.dob, sp.admission_date, sp.guardian_name, sp.guardian_phone, sp.previous_school, sp.emergency_contact, sp.medical_notes,
-            sp.address_line, sp.city, sp.state, sp.country
+            sp.address_line, sp.city, sp.state, sp.country,
+            (
+                SELECT se.class_id FROM student_enrollments se 
+                WHERE se.student_id = u.id AND se.status = 'active' 
+                ORDER BY se.id DESC LIMIT 1
+            ) AS current_class_id
         FROM users u 
         LEFT JOIN student_profiles sp ON sp.user_id = u.id 
         WHERE u.role='student' 
@@ -592,6 +643,13 @@ include '../components/header.php';
 </div>
 
 <?php
+// Build class options HTML
+$classesOptionsHtml = '<option value="">Select class</option>';
+foreach (($classes ?? []) as $c) {
+    $label = ($c['class_name'] ?? 'Class') . ' · Grade ' . (int)($c['grade_level'] ?? 0) . ' · AY ' . htmlspecialchars($c['academic_year'] ?? '', ENT_QUOTES);
+    $classesOptionsHtml .= '<option value="' . (int)$c['id'] . '">' . htmlspecialchars($label, ENT_QUOTES) . '</option>';
+}
+
 // Add Student Modal
 $addStudentForm = '
 <form id="addStudentForm" method="POST" class="form" data-validate="true" enctype="multipart/form-data">
@@ -645,6 +703,13 @@ $addStudentForm = '
             <label for="previous_school">Previous School</label>
             <input type="text" id="previous_school" name="previous_school" placeholder="Enter previous school">
         </div>
+    </div>
+
+    <div class="form-group">
+        <label for="class_id">Assign to Class</label>
+        <select id="class_id" name="class_id">
+            ' . $classesOptionsHtml . '
+        </select>
     </div>
 
     <div class="form-row">
@@ -765,6 +830,13 @@ $editStudentForm = '
         </div>
     </div>
 
+    <div class="form-group">
+        <label for="edit_class_id">Assign to Class</label>
+        <select id="edit_class_id" name="class_id">
+            ' . $classesOptionsHtml . '
+        </select>
+    </div>
+
     <div class="form-row">
         <div class="form-group">
             <label for="edit_guardian_name">Guardian Name</label>
@@ -860,7 +932,8 @@ window.studentDataMap = {
         'state' => $st['state'] ?? '',
         'country' => $st['country'] ?? '',
         'emergency_contact' => $st['emergency_contact'] ?? '',
-        'medical_notes' => $st['medical_notes'] ?? ''
+        'medical_notes' => $st['medical_notes'] ?? '',
+        'current_class_id' => isset($st['current_class_id']) ? (int)$st['current_class_id'] : null
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>,
     <?php endforeach; ?>
 };
@@ -882,7 +955,8 @@ window.studentDataMap[<?php echo (int)$view_student['id']; ?>] = <?php echo json
     'state' => $view_student['state'] ?? '',
     'country' => $view_student['country'] ?? '',
     'emergency_contact' => $view_student['emergency_contact'] ?? '',
-    'medical_notes' => $view_student['medical_notes'] ?? ''
+    'medical_notes' => $view_student['medical_notes'] ?? '',
+    'current_class_id' => isset($current_classes[0]['id']) ? (int)$current_classes[0]['id'] : null
 ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
 <?php endif; ?>
 
@@ -933,6 +1007,8 @@ function openEditStudentModal(id) {
         document.getElementById('edit_country').value = data.country || '';
         document.getElementById('edit_emergency_contact').value = data.emergency_contact || '';
         document.getElementById('edit_medical_notes').value = data.medical_notes || '';
+        var select = document.getElementById('edit_class_id');
+        if (select) { select.value = (data.current_class_id || '').toString(); }
     } else {
         document.getElementById('edit_id').value = id;
     }
