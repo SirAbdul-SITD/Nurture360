@@ -185,8 +185,8 @@ include '../components/header.php';
             <p><small>This could mean:</small></p>
             <ul style="text-align: left; display: inline-block;">
               <li>No students have taken this exam yet</li>
-              <li>Students are taking exams but results aren't being saved</li>
-              <li>Database query issue</li>
+              <!-- <li>Students are taking exams but results aren't being saved</li>
+              <li>Database query issue</li> -->
             </ul>
           </div>
         <?php else: ?>

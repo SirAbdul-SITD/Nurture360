@@ -43,6 +43,57 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
                     <span>Messages</span>
                 </a>
             </li>
+            <li class="nav-section"><span class="nav-section-title">Teaching Tools</span></li>
+            <li class="nav-item">
+                <a href="../pages/timetable.php" class="nav-link <?php echo $current_page === 'timetable' ? 'active' : ''; ?>">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Timetable</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="../pages/assignments.php" class="nav-link <?php echo $current_page === 'assignments' ? 'active' : ''; ?>">
+                    <i class="fas fa-tasks"></i>
+                    <span>Assignments</span>
+                </a>
+            </li>
+            <!--
+            <li class="nav-item">
+                <a href="../pages/content_pages.php" class="nav-link <?php echo $current_page === 'content_pages' ? 'active' : ''; ?>">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Content Pages</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="../pages/resources.php" class="nav-link <?php echo $current_page === 'resources' ? 'active' : ''; ?>">
+                    <i class="fas fa-folder-open"></i>
+                    <span>Learning Resources</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="../pages/virtual-classes.php" class="nav-link <?php echo $current_page === 'virtual-classes' ? 'active' : ''; ?>">
+                    <i class="fas fa-video"></i>
+                    <span>Virtual Classes</span>
+                </a>
+            </li>
+            -->
+            <li class="nav-item">
+                <a href="../pages/tests.php" class="nav-link <?php echo $current_page === 'tests' ? 'active' : ''; ?>">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Assessments</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="../pages/transcript.php" class="nav-link <?php echo $current_page === 'transcript' ? 'active' : ''; ?>">
+                    <i class="fas fa-file-signature"></i>
+                    <span>Transcript</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="../pages/attendance.php" class="nav-link <?php echo $current_page === 'attendance' ? 'active' : ''; ?>">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Attendance</span>
+                </a>
+            </li>
             <li class="nav-section"><span class="nav-section-title">Account</span></li>
             <li class="nav-item">
                 <a href="../supervisor/profile.php" class="nav-link <?php echo $current_page === 'profile' && $current_dir === 'supervisor' ? 'active' : ''; ?>">
@@ -77,16 +128,18 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
                     <span>My Classes</span>
                 </a>
             </li>
+            <!--
             <li class="nav-item">
                 <a href="../pages/assignments.php" class="nav-link <?php echo $current_page === 'assignments' ? 'active' : ''; ?>">
                     <i class="fas fa-tasks"></i>
                     <span>Assignments</span>
                 </a>
             </li>
+            -->
             <li class="nav-item">
                 <a href="../pages/tests.php" class="nav-link <?php echo $current_page === 'tests' ? 'active' : ''; ?>">
                     <i class="fas fa-question-circle"></i>
-                    <span>Tests & Quizzes</span>
+                    <span>Assessments</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -95,12 +148,15 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
                     <span>Exams</span>
                 </a>
             </li>
+            <!--
             <li class="nav-item">
                 <a href="../pages/virtual-classes.php" class="nav-link <?php echo $current_page === 'virtual-classes' ? 'active' : ''; ?>">
                     <i class="fas fa-video"></i>
                     <span>Virtual Classes</span>
                 </a>
             </li>
+            -->
+            <!-- Teacher Attendance hidden for now per request
             <li class="nav-item">
                 <a href="../pages/teacher_attendance.php" class="nav-link <?php echo $current_page === 'teacher_attendance' ? 'active' : ''; ?>">
                     <i class="fas fa-calendar-check"></i>
@@ -113,6 +169,7 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
                     <span>Attendance Summary</span>
                 </a>
             </li>
+            -->
             <li class="nav-item">
                 <a href="../pages/grades.php" class="nav-link <?php echo $current_page === 'grades' ? 'active' : ''; ?>">
                     <i class="fas fa-chart-line"></i>
@@ -132,6 +189,7 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
                     <span>Resources</span>
                 </a>
             </li>
+            <!-- Teacher Virtual Classes hidden for now per request -->
             <li class="nav-item">
                 <a href="../pages/announcements.php" class="nav-link <?php echo $current_page === 'announcements' ? 'active' : ''; ?>">
                     <i class="fas fa-bullhorn"></i>
@@ -218,7 +276,7 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
                 </a>
             </li>
             
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a href="../pages/timetable.php" class="nav-link <?php echo $current_page === 'timetable' ? 'active' : ''; ?>">
                     <i class="fas fa-calendar-alt"></i>
                     <span>Timetable</span>
@@ -230,7 +288,7 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
                     <i class="fas fa-tasks"></i>
                     <span>Assignments</span>
                 </a>
-            </li>
+            </li> -->
             
             <!-- Learning Management -->
             <li class="nav-section">
@@ -245,6 +303,7 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
             </li>
 
             <li class="nav-item">
+                <!--
                 <a href="../pages/content_pages.php" class="nav-link <?php echo $current_page === 'content_pages' ? 'active' : ''; ?>">
                     <i class="fas fa-file-alt"></i>
                     <span>Content Pages</span>
@@ -264,11 +323,12 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
                     <span>Virtual Classes</span>
                 </a>
             </li>
+                -->
             
             <li class="nav-item">
                 <a href="../pages/tests.php" class="nav-link <?php echo $current_page === 'tests' ? 'active' : ''; ?>">
                     <i class="fas fa-question-circle"></i>
-                    <span>Tests & Quizzes</span>
+                    <span>Assessments</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -323,14 +383,14 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
                 </a>
             </li>
             
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a href="../pages/analytics.php" class="nav-link <?php echo $current_page === 'analytics' ? 'active' : ''; ?>">
                     <i class="fas fa-chart-pie"></i>
                     <span>Analytics</span>
                 </a>
-            </li>
+            </li> -->
             
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a href="../pages/transcript.php" class="nav-link <?php echo $current_page === 'transcript' ? 'active' : ''; ?>">
                     <i class="fas fa-file-signature"></i>
                     <span>Transcript</span>
@@ -342,7 +402,7 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
                     <i class="fas fa-calendar-check"></i>
                     <span>Attendance</span>
                 </a>
-            </li>
+            </li> -->
             
             <!-- System -->
             <li class="nav-section">
