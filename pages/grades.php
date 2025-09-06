@@ -6,8 +6,27 @@ $pdo = getDBConnection();
 function canManageGrades(){ return isSuperAdmin() || (($_SESSION['role'] ?? '') === 'teacher'); }
 function isStudentRole(){ return (($_SESSION['role'] ?? '') === 'student'); }
 
+// Detect the primary key column in `subjects` table (`id` vs `subject_id`)
+function getSubjectPkColumn(PDO $pdo){
+  static $col = null;
+  if ($col !== null) return $col;
+  try {
+    $st = $pdo->query("SHOW COLUMNS FROM subjects LIKE 'id'");
+    $col = ($st && $st->fetch()) ? 'id' : 'subject_id';
+  } catch (Throwable $e) {
+    // Fallback safely to 'id' if SHOW COLUMNS is not permitted
+    $col = 'id';
+  }
+  return $col;
+}
+
 function getClasses(PDO $pdo){return $pdo->query("SELECT id,class_name,class_code,grade_level FROM classes WHERE COALESCE(is_active,1)=1 ORDER BY grade_level,class_name")->fetchAll();}
-function getSubjects(PDO $pdo){return $pdo->query("SELECT id,subject_name,subject_code FROM subjects WHERE COALESCE(is_active,1)=1 ORDER BY subject_name")->fetchAll();}
+function getSubjects(PDO $pdo){
+  $pk = getSubjectPkColumn($pdo);
+  // Use `title` as the subject display/name field in the current schema
+  $sql = "SELECT {$pk} AS id, title AS subject_name, subject_code FROM subjects WHERE COALESCE(is_active,1)=1 ORDER BY title";
+  return $pdo->query($sql)->fetchAll();
+}
 function getStudents(PDO $pdo){$s=$pdo->prepare("SELECT id,first_name,last_name,username FROM users WHERE role='student' AND COALESCE(is_active,1)=1 ORDER BY first_name,last_name");$s->execute();return $s->fetchAll();}
 
 // Default options
@@ -24,11 +43,12 @@ if (function_exists('isTeacher') && isTeacher()) {
   $stC->execute([$teacherId]);
   $classes = $stC->fetchAll();
   // Subjects assigned to teacher
-  $stS = $pdo->prepare("SELECT DISTINCT s.id,s.subject_name,s.subject_code
+  $subPk = getSubjectPkColumn($pdo);
+  $stS = $pdo->prepare("SELECT DISTINCT s.".$subPk." AS id, s.title AS subject_name, s.subject_code
                         FROM teacher_assignments ta
-                        JOIN subjects s ON s.id=ta.subject_id
+                        JOIN subjects s ON s.".$subPk." = ta.subject_id
                         WHERE ta.teacher_id=? AND COALESCE(ta.is_active,1)=1 AND COALESCE(s.is_active,1)=1
-                        ORDER BY s.subject_name");
+                        ORDER BY s.title");
   $stS->execute([$teacherId]);
   $subjects = $stS->fetchAll();
   // Students enrolled in teacher's classes
@@ -72,15 +92,16 @@ if (function_exists('isTeacher') && isTeacher()) {
 if ($classId>0) { $whereTests[] = 't.class_id = ?'; $params[]=$classId; $whereAssign[]='a.class_id = ?'; }
 if ($subjectId>0) { $whereTests[] = 't.subject_id = ?'; $params[]=$subjectId; $whereAssign[]='a.subject_id = ?'; }
 if ($studentId>0) { $whereTests[] = 'tr.student_id = ?'; $params[]=$studentId; $whereAssign[]='asub.student_id = ?'; }
-if ($q!=='') { $like = '%'.$q.'%'; $whereTests[] = '(t.title LIKE ? OR s.subject_name LIKE ? OR c.class_name LIKE ? OR CONCAT(u1.first_name, " ", u1.last_name) LIKE ?)'; $params[]=$like; $params[]=$like; $params[]=$like; $params[]=$like; $whereAssign[]='(a.title LIKE ? OR s2.subject_name LIKE ? OR c2.class_name LIKE ? OR CONCAT(u2.first_name, " ", u2.last_name) LIKE ?)'; }
+if ($q!=='') { $like = '%'.$q.'%'; $whereTests[] = '(t.title LIKE ? OR s.title LIKE ? OR c.class_name LIKE ? OR CONCAT(u1.first_name, " ", u1.last_name) LIKE ?)'; $params[]=$like; $params[]=$like; $params[]=$like; $params[]=$like; $whereAssign[]='(a.title LIKE ? OR s2.title LIKE ? OR c2.class_name LIKE ? OR CONCAT(u2.first_name, " ", u2.last_name) LIKE ?)'; }
 
+$subjectPk = getSubjectPkColumn($pdo);
 $testsSQL = "SELECT 'test' AS rec_type, tr.id AS rec_id, tr.student_id, tr.obtained_marks, tr.total_marks, tr.percentage, tr.grade, tr.submitted_at,
-  t.id AS item_id, t.title AS item_title, t.test_type AS item_type, c.class_name, c.class_code, s.subject_name, s.subject_code,
+  t.id AS item_id, t.title AS item_title, t.test_type AS item_type, c.class_name, c.class_code, s.title AS subject_name, s.subject_code,
   u1.first_name AS student_first, u1.last_name AS student_last, u1.username AS student_username
   FROM test_results tr
   INNER JOIN tests t ON t.id = tr.test_id
   LEFT JOIN classes c ON c.id=t.class_id
-  LEFT JOIN subjects s ON s.id=t.subject_id
+  LEFT JOIN subjects s ON s.".$subjectPk."=t.subject_id
   LEFT JOIN users u1 ON u1.id=tr.student_id";
 if ($whereTests) { $testsSQL .= ' WHERE '.implode(' AND ', $whereTests); }
 
@@ -88,12 +109,12 @@ $assignSQL = "SELECT 'assignment' AS rec_type, asub.id AS rec_id, asub.student_i
   COALESCE(asub.obtained_marks,0) AS obtained_marks, COALESCE(asub.total_marks,0) AS total_marks,
   CASE WHEN COALESCE(asub.total_marks,0)>0 THEN ROUND((COALESCE(asub.obtained_marks,0)/asub.total_marks)*100,2) ELSE 0 END AS percentage,
   asub.grade, asub.submitted_at,
-  a.id AS item_id, a.title AS item_title, 'assignment' AS item_type, c2.class_name, c2.class_code, s2.subject_name, s2.subject_code,
+  a.id AS item_id, a.title AS item_title, 'assignment' AS item_type, c2.class_name, c2.class_code, s2.title AS subject_name, s2.subject_code,
   u2.first_name AS student_first, u2.last_name AS student_last, u2.username AS student_username
   FROM assignment_submissions asub
   INNER JOIN assignments a ON a.id = asub.assignment_id
   LEFT JOIN classes c2 ON c2.id=a.class_id
-  LEFT JOIN subjects s2 ON s2.id=a.subject_id
+  LEFT JOIN subjects s2 ON s2.".$subjectPk."=a.subject_id
   LEFT JOIN users u2 ON u2.id=asub.student_id";
 if ($whereAssign) { $assignSQL .= ' WHERE '.implode(' AND ', $whereAssign); }
 

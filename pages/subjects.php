@@ -34,7 +34,8 @@ try {
             $is_active = 1; // always active by default
             if ($name === '') throw new Exception('Subject name is required');
             $code = generateUniqueSubjectCode($pdo);
-            $stmt = $pdo->prepare("INSERT INTO subjects (subject_name, subject_code, description, credits, is_active) VALUES (?, ?, ?, ?, ?)");
+            // Use `title` as the subject name column
+            $stmt = $pdo->prepare("INSERT INTO subjects (title, subject_code, description, credits, is_active) VALUES (?, ?, ?, ?, ?)");
             $stmt->execute([$name, $code, $description, $credits, $is_active]);
             $newSubjectId = (int)$pdo->lastInsertId();
             // Optionally assign to a class if provided
@@ -60,7 +61,7 @@ try {
             $class_id = (int)($_POST['class_id'] ?? 0);
             if ($name === '') throw new Exception('Subject name is required');
             // Only update the name; keep other fields unchanged
-            $stmt = $pdo->prepare("UPDATE subjects SET subject_name=? WHERE id=?");
+            $stmt = $pdo->prepare("UPDATE subjects SET title=? WHERE subject_id=?");
             $stmt->execute([$name, $id]);
             // Ensure assignment to selected class if provided
             if ($class_id > 0) {
@@ -79,7 +80,7 @@ try {
         } elseif ($action === 'delete') {
             $id = (int)($_POST['id'] ?? 0);
             if ($id <= 0) throw new Exception('Invalid subject ID');
-            $stmt = $pdo->prepare("DELETE FROM subjects WHERE id=?");
+            $stmt = $pdo->prepare("DELETE FROM subjects WHERE subject_id=?");
             $stmt->execute([$id]);
             $message = 'Subject deleted successfully';
         }
@@ -88,9 +89,19 @@ try {
     $error = $e->getMessage();
 }
 
-// Fetch subjects
-$stmt = $pdo->query("SELECT * FROM subjects ORDER BY subject_name");
-$subjects = $stmt->fetchAll();
+// Fetch subjects with associated class names (if any)
+$sql = "SELECT s.subject_id AS id,
+               s.title AS subject_name,
+               s.subject_code,
+               s.is_active,
+               GROUP_CONCAT(DISTINCT c.class_name ORDER BY c.grade_level, c.class_name SEPARATOR ', ') AS class_names
+        FROM subjects s
+        LEFT JOIN class_subjects cs ON cs.subject_id = s.subject_id
+        LEFT JOIN classes c ON c.id = cs.class_id
+        GROUP BY s.subject_id, s.title, s.subject_code, s.is_active
+        ORDER BY s.title";
+$stmt = $pdo->query($sql);
+$subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch active classes for dropdowns
 try {
@@ -140,6 +151,8 @@ include '../components/header.php';
                             <i class="fas fa-book"></i>
                         </div>
                         <div class="teacher-name"><strong><?php echo htmlspecialchars($s['subject_name']); ?></strong></div>
+                        <?php $clsList = trim((string)($s['class_names'] ?? '')); ?>
+                        <div class="virtual-meta">Classes: <?php echo $clsList !== '' ? htmlspecialchars($clsList) : 'Unassigned'; ?></div>
                         <div class="teacher-username">#<?php echo htmlspecialchars($code); ?></div>
                         <!-- Removed details body to keep only name, code, and actions -->
                         <div class="teacher-card-actions action-buttons centered">

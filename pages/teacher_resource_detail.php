@@ -11,10 +11,10 @@ if ($resourceId <= 0) { redirect('./teacher_resources.php'); }
 $stmt = $pdo->prepare(
   "SELECT lr.*, 
           c.class_name, c.class_code, c.grade_level, c.academic_year,
-          s.subject_name, s.subject_code
+          s.title AS subject_name, s.subject_code
      FROM learning_resources lr
      LEFT JOIN classes c ON c.id = lr.class_id
-     LEFT JOIN subjects s ON s.id = lr.subject_id
+     LEFT JOIN subjects s ON s.subject_id = lr.subject_id
     WHERE lr.id = ? AND lr.uploaded_by = ?"
 );
 $stmt->execute([$resourceId, $teacherId]);

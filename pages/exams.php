@@ -15,7 +15,7 @@ function tClasses(PDO $pdo, int $tid): array {
   return $q->fetchAll();
 }
 function tSubjects(PDO $pdo, int $tid): array {
-  $q=$pdo->prepare('SELECT DISTINCT s.id,s.subject_name,s.subject_code FROM teacher_assignments ta JOIN subjects s ON s.id=ta.subject_id WHERE ta.teacher_id=? AND COALESCE(ta.is_active,1)=1 ORDER BY s.subject_name');
+  $q=$pdo->prepare('SELECT DISTINCT s.subject_id AS id, s.title AS subject_name, s.subject_code FROM teacher_assignments ta JOIN subjects s ON s.subject_id=ta.subject_id WHERE ta.teacher_id=? AND COALESCE(ta.is_active,1)=1 ORDER BY s.title');
   $q->execute([$tid]);
   return $q->fetchAll();
 }
@@ -97,14 +97,14 @@ try {
 // Load lists
 if ($isAdmin) {
   $classes = $pdo->query('SELECT id,class_name,class_code FROM classes ORDER BY grade_level,class_name')->fetchAll();
-  $subjects = $pdo->query('SELECT id,subject_name,subject_code FROM subjects ORDER BY subject_name')->fetchAll();
+  $subjects = $pdo->query('SELECT subject_id AS id, title AS subject_name, subject_code FROM subjects ORDER BY title')->fetchAll();
 } else {
   $classes = tClasses($pdo,$userId);
   $subjects = tSubjects($pdo,$userId);
 }
 
 // Exams created (templates: student_id=0)
-$exams = $pdo->query("SELECT e.*, c.class_name,c.class_code, s.subject_name,s.subject_code FROM exam_assessments e LEFT JOIN classes c ON c.id=e.class_id LEFT JOIN subjects s ON s.id=e.subject_id WHERE e.student_id=0 ORDER BY e.exam_assessment_id DESC")->fetchAll();
+$exams = $pdo->query("SELECT e.*, c.class_name,c.class_code, s.title AS subject_name, s.subject_code FROM exam_assessments e LEFT JOIN classes c ON c.id=e.class_id LEFT JOIN subjects s ON s.subject_id=e.subject_id WHERE e.student_id=0 ORDER BY e.exam_assessment_id DESC")->fetchAll();
 
 $page_title = 'Exams';
 $current_page = 'exams';

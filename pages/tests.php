@@ -13,7 +13,7 @@ try{
 }catch(Throwable $e){ $hasLessonId=false; }
 
 function getClasses(PDO $pdo){return $pdo->query("SELECT id,class_name,class_code,grade_level,academic_year FROM classes WHERE COALESCE(is_active,1)=1 ORDER BY grade_level,class_name")->fetchAll();}
-function getSubjects(PDO $pdo){return $pdo->query("SELECT id,subject_name,subject_code FROM subjects WHERE COALESCE(is_active,1)=1 ORDER BY subject_name")->fetchAll();}
+function getSubjects(PDO $pdo){return $pdo->query("SELECT subject_id AS id, title AS subject_name, subject_code FROM subjects WHERE COALESCE(is_active,1)=1 ORDER BY title")->fetchAll();}
 function getTeachers(PDO $pdo){$s=$pdo->prepare("SELECT id,first_name,last_name,username FROM users WHERE role='teacher' AND COALESCE(is_active,1)=1 ORDER BY first_name,last_name");$s->execute();return $s->fetchAll();}
 
 try{
@@ -89,7 +89,7 @@ $teacherId = getCurrentUserId();
 if (isTeacher()) {
   $s=$pdo->prepare("SELECT DISTINCT c.id,c.class_name,c.class_code,c.grade_level,c.academic_year FROM teacher_assignments ta JOIN classes c ON c.id=ta.class_id WHERE ta.teacher_id=? AND COALESCE(ta.is_active,1)=1 AND COALESCE(c.is_active,1)=1 ORDER BY c.grade_level,c.class_name");
   $s->execute([$teacherId]); $classes=$s->fetchAll();
-  $s=$pdo->prepare("SELECT DISTINCT s.id,s.subject_name,s.subject_code FROM teacher_assignments ta JOIN subjects s ON s.id=ta.subject_id WHERE ta.teacher_id=? AND COALESCE(ta.is_active,1)=1 AND COALESCE(s.is_active,1)=1 ORDER BY s.subject_name");
+  $s=$pdo->prepare("SELECT DISTINCT s.subject_id AS id, s.title AS subject_name, s.subject_code FROM teacher_assignments ta JOIN subjects s ON s.subject_id=ta.subject_id WHERE ta.teacher_id=? AND COALESCE(ta.is_active,1)=1 AND COALESCE(s.is_active,1)=1 ORDER BY s.title");
   $s->execute([$teacherId]); $subjects=$s->fetchAll();
   $teachers=[[ 'id'=>$teacherId, 'first_name'=>$_SESSION['first_name']??'', 'last_name'=>$_SESSION['last_name']??'', 'username'=>$_SESSION['username']??'' ]];
 } else {
@@ -101,15 +101,15 @@ $q=trim($_GET['q']??'');
 $where=[]; $params=[];
 if (isTeacher()) { $where[]='t.teacher_id = ?'; $params[]=$teacherId; }
 if($q!==''){
-  $where[]='(t.title LIKE ? OR s.subject_name LIKE ? OR c.class_name LIKE ?)';
+  $where[]='(t.title LIKE ? OR s.title LIKE ? OR c.class_name LIKE ?)';
   $params[]='%'.$q.'%'; $params[]='%'.$q.'%'; $params[]='%'.$q.'%';
 }
-$baseSql="FROM tests t LEFT JOIN classes c ON c.id=t.class_id LEFT JOIN subjects s ON s.id=t.subject_id LEFT JOIN users u ON u.id=t.teacher_id";
+$baseSql="FROM tests t LEFT JOIN classes c ON c.id=t.class_id LEFT JOIN subjects s ON s.subject_id=t.subject_id LEFT JOIN users u ON u.id=t.teacher_id";
 if($where){ $baseSql.=' WHERE '.implode(' AND ',$where); }
 $perPage=9; $pageNum=max(1,(int)($_GET['page']??1));
 $cnt=$pdo->prepare('SELECT COUNT(*) ' . $baseSql); $cnt->execute($params); $totalRows=(int)$cnt->fetchColumn();
 $totalPages=max(1,(int)ceil($totalRows/$perPage)); if($pageNum>$totalPages) $pageNum=$totalPages; $offset=($pageNum-1)*$perPage;
-$st=$pdo->prepare('SELECT t.*, c.class_name,c.class_code, s.subject_name,s.subject_code, u.first_name,u.last_name,u.username ' . $baseSql . ' ORDER BY t.scheduled_date DESC, t.start_time DESC LIMIT ' . $perPage . ' OFFSET ' . $offset);
+$st=$pdo->prepare('SELECT t.*, c.class_name,c.class_code, s.title AS subject_name, s.subject_code, u.first_name,u.last_name,u.username ' . $baseSql . ' ORDER BY t.scheduled_date DESC, t.start_time DESC LIMIT ' . $perPage . ' OFFSET ' . $offset);
 $st->execute($params); $tests=$st->fetchAll();
 
 $page_title='Tests & Quizzes';
@@ -197,7 +197,7 @@ $form=''
 .'</div>'
 .'<div class="form-row">'
 .'<div class="form-group"><label>Class *</label><select name="class_id" required><option value="">Select</option>'.$clsOpts.'</select></div>'
-.'<div class="form-group"><label>Subject *</label><select name="subject_id" required><option value="">Select</option>'.$subOpts.'</select></div>'
+.'<div class="form-group"><label>Subject *</label><select name="subject_id" required><option value="">Select</option>'.$subOpts.'</select><div class="muted">Filtered by selected class</div></div>'
 .$teacherFieldCreate
 .'</div>'
 .($hasLessonId
@@ -249,6 +249,43 @@ renderFormModal('editTestModal','Edit Test',$editForm,'Save','Cancel',['size'=>'
 renderConfirmModal('deleteTestModal','Delete Test','Are you sure you want to delete this test?','Delete','Cancel',["type"=>"warning","onConfirm"=>"handleDeleteTest"]);
 ?>
 <script>
+// Fetch subjects by class
+async function fetchClassSubjects(classId){
+  if(!classId) return [];
+  try{
+    const res = await fetch('../api/subjects_by_class.php?class_id='+encodeURIComponent(classId));
+    if(!res.ok) return [];
+    return await res.json();
+  }catch(e){ return []; }
+}
+
+function bindSubjectFilter(formId){
+  const form = document.getElementById(formId);
+  if(!form) return;
+  const classSel = form.querySelector('[name="class_id"]');
+  const subjSel = form.querySelector('[name="subject_id"]');
+  const lessonWrap = formId==='createTestForm' ? document.getElementById('lesson_wrapper_create') : document.getElementById('lesson_wrapper_edit');
+  const lessonSel = formId==='createTestForm' ? document.getElementById('lesson_id_create') : document.getElementById('lesson_id_edit');
+  async function reloadSubjects(){
+    const cid = classSel && classSel.value ? classSel.value : '';
+    const current = subjSel ? subjSel.value : '';
+    subjSel.innerHTML = '<option value="">Select</option>';
+    if(!cid){ if(lessonSel){ lessonSel.innerHTML='<option value="">Select lesson</option>'; } return; }
+    const list = await fetchClassSubjects(cid);
+    (list||[]).forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.id;
+      opt.textContent = (s.subject_name||'') + (s.subject_code?(' #'+s.subject_code):'');
+      subjSel.appendChild(opt);
+    });
+    // Try to keep previously selected subject if still available
+    if(current){ subjSel.value = current; }
+    // Reset lessons when subject list changes
+    if(lessonSel){ lessonSel.innerHTML = '<option value="">Select lesson</option>'; }
+    if(lessonWrap){ /* visibility handled elsewhere by scope controls */ }
+  }
+  if(classSel){ classSel.addEventListener('change', reloadSubjects); }
+}
 // Helper to fetch lessons for class+subject
 async function fetchLessons(classId, subjectId){
   if(!classId || !subjectId) return [];
@@ -299,11 +336,27 @@ function openEditTestModal(id,data){
   if(window.openModalEditTestModal) window.openModalEditTestModal(); else { var m=document.getElementById('editTestModal'); if(m){m.classList.add('show','active'); document.body.classList.add('modal-open'); } }
   // Ensure listeners are active
   bindEditScopeControls();
+  // Reload subject list according to selected class for Edit form, then set selected subject
+  (async function(){
+    const f = document.getElementById('editTestForm');
+    if(!f) return;
+    bindSubjectFilter('editTestForm');
+    const classId = f.querySelector('[name="class_id"]').value;
+    const subjSel = f.querySelector('[name="subject_id"]');
+    const list = await fetchClassSubjects(classId);
+    subjSel.innerHTML = '<option value="">Select</option>' + (list||[]).map(s=>'<option value="'+s.id+'">'+((s.subject_name||'')+(s.subject_code?(' #'+s.subject_code):''))+'</option>').join('');
+    subjSel.value = data['subject_id']||'';
+  })();
 }
 var currentTestId=null; function openDeleteTestModal(id){ currentTestId=id; if(window.openModalDeleteTestModal) window.openModalDeleteTestModal(); else { var m=document.getElementById('deleteTestModal'); if(m){m.classList.add('show','active'); document.body.classList.add('modal-open'); } } }
 function handleDeleteTest(){ if(!currentTestId) return; var f=document.createElement('form'); f.method='POST'; f.innerHTML='<input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="'+currentTestId+'">'; document.body.appendChild(f); f.submit(); }
 
 // Initialize dynamic controls when modals are present
-document.addEventListener('DOMContentLoaded', function(){ bindCreateScopeControls(); bindEditScopeControls(); });
+document.addEventListener('DOMContentLoaded', function(){
+  bindCreateScopeControls();
+  bindEditScopeControls();
+  bindSubjectFilter('createTestForm');
+  bindSubjectFilter('editTestForm');
+});
 </script>
 <?php include '../components/footer.php'; ?>

@@ -10,7 +10,11 @@ $studentId = (int)($_GET['student_id'] ?? 0);
 if ($examId <= 0 || $studentId <= 0) { redirect('./exams.php'); }
 
 // Load exam template
-$examStmt = $pdo->prepare('SELECT e.*, c.class_name,c.class_code, s.subject_name,s.subject_code FROM exam_assessments e LEFT JOIN classes c ON c.id=e.class_id LEFT JOIN subjects s ON s.id=e.subject_id WHERE e.exam_assessment_id=? AND e.student_id=0');
+$examStmt = $pdo->prepare("SELECT e.*, c.class_name,c.class_code, s.title AS subject_name,s.subject_code
+                     FROM exam_assessments e
+                     LEFT JOIN classes c ON c.id=e.class_id
+                     LEFT JOIN subjects s ON s.subject_id=e.subject_id
+                     WHERE e.exam_assessment_id=? AND e.student_id=0");
 $examStmt->execute([$examId]);
 $exam = $examStmt->fetch(PDO::FETCH_ASSOC);
 if (!$exam) { redirect('./exams.php'); }

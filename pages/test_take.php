@@ -9,7 +9,7 @@ $testId = (int)($_GET['id'] ?? 0);
 if ($testId <= 0) { redirect('./tests.php'); }
 
 // Load test
-$st = $pdo->prepare("SELECT t.*, c.class_name,c.class_code, s.subject_name,s.subject_code FROM tests t LEFT JOIN classes c ON c.id=t.class_id LEFT JOIN subjects s ON s.id=t.subject_id WHERE t.id=?");
+$st = $pdo->prepare("SELECT t.*, c.class_name,c.class_code, s.title AS subject_name,s.subject_code FROM tests t LEFT JOIN classes c ON c.id=t.class_id LEFT JOIN subjects s ON s.subject_id=t.subject_id WHERE t.id=?");
 $st->execute([$testId]);
 $test = $st->fetch();
 if (!$test) { redirect('./tests.php'); }
@@ -152,6 +152,37 @@ include '../components/header.php';
       </div></div>
     <?php elseif($role!=='student'): ?>
       <div class="alert alert-info">Only students can take tests. You can preview questions below.</div>
+      <div class="content-card"><div class="content-card-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div><strong>Preview Mode</strong> (inputs disabled)</div>
+          <div><strong>Duration:</strong> <?php echo (int)$test['duration_minutes']; ?> minutes</div>
+        </div>
+        <?php foreach($questions as $index=>$q): $qid=(int)$q['id']; $opts=$q['options']?json_decode($q['options'],true):null; ?>
+          <div class="question">
+            <div><strong>Q<?php echo $index+1; ?> (<?php echo (int)$q['marks']; ?> mark<?php echo $q['marks']>1?'s':''; ?>):</strong> <?php echo nl2br(htmlspecialchars($q['question_text'])); ?></div>
+            <div style="margin-top:8px">
+              <?php if($q['question_type']==='objective_single' && is_array($opts)): ?>
+                <?php foreach($opts as $opt): $optVal=htmlspecialchars($opt); ?>
+                  <div><label><input type="radio" disabled> <?php echo $optVal; ?></label></div>
+                <?php endforeach; ?>
+              <?php elseif($q['question_type']==='objective_multiple' && is_array($opts)): ?>
+                <?php foreach($opts as $opt): $optVal=htmlspecialchars($opt); ?>
+                  <div><label><input type="checkbox" disabled> <?php echo $optVal; ?></label></div>
+                <?php endforeach; ?>
+              <?php elseif($q['question_type']==='true_false'): ?>
+                <div><label><input type="radio" disabled> True</label></div>
+                <div><label><input type="radio" disabled> False</label></div>
+              <?php elseif($q['question_type']==='short_answer'): ?>
+                <input type="text" class="form-control" placeholder="Your answer" disabled>
+              <?php elseif($q['question_type']==='essay' || $q['question_type']==='practical'): ?>
+                <textarea rows="4" class="form-control" placeholder="Your essay..." disabled></textarea>
+              <?php else: ?>
+                <input type="text" class="form-control" disabled>
+              <?php endif; ?>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      </div></div>
     <?php elseif($windowStatus==='upcoming'): ?>
       <div class="alert alert-warning">This test has not started yet.</div>
     <?php elseif($windowStatus==='ended'): ?>

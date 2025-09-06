@@ -12,7 +12,7 @@ if ($examId <= 0) { redirect('./exams.php'); }
 // Load exam template. If student-specific ID was passed, map to template by class/subject/timespan
 $E = null; $templateId = $examId;
 try {
-  $examStmt = $pdo->prepare('SELECT e.*, c.class_name,c.class_code, s.subject_name,s.subject_code FROM exam_assessments e LEFT JOIN classes c ON c.id=e.class_id LEFT JOIN subjects s ON s.id=e.subject_id WHERE e.exam_assessment_id=? AND e.student_id=0');
+  $examStmt = $pdo->prepare('SELECT e.*, c.class_name,c.class_code, s.title AS subject_name,s.subject_code FROM exam_assessments e LEFT JOIN classes c ON c.id=e.class_id LEFT JOIN subjects s ON s.subject_id=e.subject_id WHERE e.exam_assessment_id=? AND e.student_id=0');
   $examStmt->execute([$examId]);
   $E = $examStmt->fetch(PDO::FETCH_ASSOC) ?: null;
   if (!$E) {
@@ -21,7 +21,7 @@ try {
     $one->execute([$examId]);
     $row = $one->fetch(PDO::FETCH_ASSOC);
     if ($row) {
-      $resTpl = $pdo->prepare('SELECT e.*, c.class_name,c.class_code, s.subject_name,s.subject_code FROM exam_assessments e LEFT JOIN classes c ON c.id=e.class_id LEFT JOIN subjects s ON s.id=e.subject_id WHERE e.student_id=0 AND e.class_id=? AND e.subject_id=? AND e.timespan=?');
+      $resTpl = $pdo->prepare('SELECT e.*, c.class_name,c.class_code, s.title AS subject_name,s.subject_code FROM exam_assessments e LEFT JOIN classes c ON c.id=e.class_id LEFT JOIN subjects s ON s.subject_id=e.subject_id WHERE e.student_id=0 AND e.class_id=? AND e.subject_id=? AND e.timespan=?');
       $resTpl->execute([(int)$row['class_id'], (int)$row['subject_id'], (string)$row['timespan']]);
       $E = $resTpl->fetch(PDO::FETCH_ASSOC) ?: null;
       if ($E) { $templateId = (int)$E['exam_assessment_id']; }

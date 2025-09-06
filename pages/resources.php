@@ -101,7 +101,7 @@ try{
 
 $classes=getClasses($pdo);$subjects=getSubjects($pdo);
 $classesCount=count($classes); $subjectsCount=count($subjects);
-$resources=$pdo->query("SELECT lr.*,c.class_name,c.class_code,c.grade_level,c.academic_year,s.subject_name,s.subject_code,u.username,u.first_name,u.last_name FROM learning_resources lr LEFT JOIN classes c ON c.id=lr.class_id LEFT JOIN subjects s ON s.id=lr.subject_id LEFT JOIN users u ON u.id=lr.uploaded_by ORDER BY lr.created_at DESC")->fetchAll();
+$resources=$pdo->query("SELECT lr.*,c.class_name,c.class_code,c.grade_level,c.academic_year,s.title AS subject_name,s.subject_code,u.username,u.first_name,u.last_name FROM learning_resources lr LEFT JOIN classes c ON c.id=lr.class_id LEFT JOIN subjects s ON s.subject_id=lr.subject_id LEFT JOIN users u ON u.id=lr.uploaded_by ORDER BY lr.created_at DESC")->fetchAll();
 
 include '../components/header.php';
 ?>

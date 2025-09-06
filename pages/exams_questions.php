@@ -17,7 +17,7 @@ if (!$isAdmin) {
   if (!$st->fetchColumn()) { redirect('../dashboard/index.php'); }
 }
 
-$subject = $pdo->prepare('SELECT id,subject_name,subject_code FROM subjects WHERE id=?');
+$subject = $pdo->prepare('SELECT subject_id AS id, title AS subject_name, subject_code FROM subjects WHERE subject_id=?');
 $subject->execute([$subjectId]);
 $S = $subject->fetch();
 if (!$S) { redirect('./exams.php'); }

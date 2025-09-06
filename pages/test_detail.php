@@ -58,7 +58,7 @@ try{
   }
 }catch(Throwable $e){ $error=$e->getMessage(); }
 
-$test=$pdo->prepare("SELECT t.*, c.class_name,c.class_code, s.subject_name,s.subject_code, u.first_name,u.last_name,u.username FROM tests t LEFT JOIN classes c ON c.id=t.class_id LEFT JOIN subjects s ON s.id=t.subject_id LEFT JOIN users u ON u.id=t.teacher_id WHERE t.id=?");
+$test=$pdo->prepare("SELECT t.*, c.class_name,c.class_code, s.title AS subject_name,s.subject_code, u.first_name,u.last_name,u.username FROM tests t LEFT JOIN classes c ON c.id=t.class_id LEFT JOIN subjects s ON s.subject_id=t.subject_id LEFT JOIN users u ON u.id=t.teacher_id WHERE t.id=?");
 $test->execute([$id]);
 $test=$test->fetch(); if(!$test){ redirect('./tests.php'); }
 

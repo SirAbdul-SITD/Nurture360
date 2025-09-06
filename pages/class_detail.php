@@ -26,12 +26,12 @@ try {
     $class = $cStmt->fetch();
     if (!$class) { throw new Exception('Class not found'); }
 
-    // Get subjects this teacher teaches in this class
-    $sStmt = $pdo->prepare("SELECT s.id, s.subject_name, s.subject_code
+    // Get subjects this teacher teaches in this class (updated schema)
+    $sStmt = $pdo->prepare("SELECT s.subject_id AS id, s.title AS subject_name, s.subject_code
                             FROM teacher_assignments ta
-                            JOIN subjects s ON s.id = ta.subject_id
+                            JOIN subjects s ON s.subject_id = ta.subject_id
                             WHERE ta.teacher_id=? AND ta.class_id=? AND COALESCE(ta.is_active,1)=1
-                            ORDER BY s.subject_name");
+                            ORDER BY s.title");
     $sStmt->execute([$teacherId, $classId]);
     $teacherSubjects = $sStmt->fetchAll();
 

@@ -9,7 +9,7 @@ if ($testId <= 0) { redirect('./tests.php'); }
 function canManage(){ return isSuperAdmin() || (($_SESSION['role'] ?? '') === 'teacher'); }
 
 // Load test header details
-$st = $pdo->prepare("SELECT t.*, c.class_name,c.class_code, s.subject_name,s.subject_code FROM tests t LEFT JOIN classes c ON c.id=t.class_id LEFT JOIN subjects s ON s.id=t.subject_id WHERE t.id=?");
+$st = $pdo->prepare("SELECT t.*, c.class_name,c.class_code, s.title AS subject_name,s.subject_code FROM tests t LEFT JOIN classes c ON c.id=t.class_id LEFT JOIN subjects s ON s.subject_id=t.subject_id WHERE t.id=?");
 $st->execute([$testId]);
 $test = $st->fetch(PDO::FETCH_ASSOC);
 if (!$test) { redirect('./tests.php'); }

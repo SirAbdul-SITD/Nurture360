@@ -31,8 +31,8 @@ try {
     $chk->execute([$class_id]);
     if (!$chk->fetchColumn()) { http_response_code(404); echo json_encode(['error' => 'Class not found']); exit; }
 
-    // Validate subject
-    $chk = $pdo->prepare("SELECT id FROM subjects WHERE id = ? AND is_active = 1");
+    // Validate subject (subjects.subject_id is the PK)
+    $chk = $pdo->prepare("SELECT subject_id FROM subjects WHERE subject_id = ? AND is_active = 1");
     $chk->execute([$subject_id]);
     if (!$chk->fetchColumn()) { http_response_code(404); echo json_encode(['error' => 'Subject not found']); exit; }
 

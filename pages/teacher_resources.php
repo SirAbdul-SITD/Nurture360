@@ -20,11 +20,11 @@ function getTeacherClasses(PDO $pdo, $teacherId){
   return $st->fetchAll();
 }
 function getTeacherSubjects(PDO $pdo, $teacherId){
-  $st = $pdo->prepare("SELECT DISTINCT s.id,s.subject_name,s.subject_code
+  $st = $pdo->prepare("SELECT DISTINCT s.subject_id AS id, s.title AS subject_name, s.subject_code
                        FROM teacher_assignments ta
-                       JOIN subjects s ON s.id=ta.subject_id
+                       JOIN subjects s ON s.subject_id=ta.subject_id
                        WHERE ta.teacher_id=? AND COALESCE(ta.is_active,1)=1 AND COALESCE(s.is_active,1)=1
-                       ORDER BY s.subject_name");
+                       ORDER BY s.title");
   $st->execute([$teacherId]);
   return $st->fetchAll();
 }
@@ -130,10 +130,10 @@ try{
 $classes=getTeacherClasses($pdo,$teacherId);$subjects=getTeacherSubjects($pdo,$teacherId);
 $classesCount=count($classes); $subjectsCount=count($subjects);
 // List only teacher's own uploads
-$resources=$pdo->prepare("SELECT lr.*,c.class_name,c.class_code,c.grade_level,c.academic_year,s.subject_name,s.subject_code
+$resources=$pdo->prepare("SELECT lr.*,c.class_name,c.class_code,c.grade_level,c.academic_year,s.title AS subject_name,s.subject_code
                           FROM learning_resources lr 
                           LEFT JOIN classes c ON c.id=lr.class_id 
-                          LEFT JOIN subjects s ON s.id=lr.subject_id 
+                          LEFT JOIN subjects s ON s.subject_id=lr.subject_id 
                           WHERE lr.uploaded_by=?
                           ORDER BY lr.created_at DESC");
 $resources->execute([$teacherId]);

@@ -96,7 +96,7 @@ $teacherId = getCurrentUserId();
 if (isTeacher()) {
   $s=$pdo->prepare("SELECT DISTINCT c.id,c.class_name,c.class_code,c.grade_level,c.academic_year FROM teacher_assignments ta JOIN classes c ON c.id=ta.class_id WHERE ta.teacher_id=? AND COALESCE(ta.is_active,1)=1 AND COALESCE(c.is_active,1)=1 ORDER BY c.grade_level,c.class_name");
   $s->execute([$teacherId]); $classes=$s->fetchAll();
-  $s=$pdo->prepare("SELECT DISTINCT s.id,s.subject_name,s.subject_code FROM teacher_assignments ta JOIN subjects s ON s.id=ta.subject_id WHERE ta.teacher_id=? AND COALESCE(ta.is_active,1)=1 AND COALESCE(s.is_active,1)=1 ORDER BY s.subject_name");
+  $s=$pdo->prepare("SELECT DISTINCT s.subject_id AS id, s.title AS subject_name, s.subject_code FROM teacher_assignments ta JOIN subjects s ON s.subject_id=ta.subject_id WHERE ta.teacher_id=? AND COALESCE(ta.is_active,1)=1 AND COALESCE(s.is_active,1)=1 ORDER BY s.title");
   $s->execute([$teacherId]); $subjects=$s->fetchAll();
   $teachers=[[ 'id'=>$teacherId, 'first_name'=>$_SESSION['first_name']??'', 'last_name'=>$_SESSION['last_name']??'', 'username'=>$_SESSION['username']??'', 'email'=>$_SESSION['email']??'' ]];
 } else {
@@ -106,20 +106,20 @@ $classesCount=count($classes); $subjectsCount=count($subjects); $teachersCount=c
 
 // Fetch list
 if (isTeacher()) {
-  $st=$pdo->prepare("SELECT v.*, c.class_name,c.class_code,c.grade_level,c.academic_year, s.subject_name,s.subject_code, u.first_name,u.last_name,u.username
+  $st=$pdo->prepare("SELECT v.*, c.class_name,c.class_code,c.grade_level,c.academic_year, s.title AS subject_name,s.subject_code, u.first_name,u.last_name,u.username
                      FROM virtual_classes v
                      LEFT JOIN classes c ON c.id=v.class_id
-                     LEFT JOIN subjects s ON s.id=v.subject_id
+                     LEFT JOIN subjects s ON s.subject_id=v.subject_id
                      LEFT JOIN users u ON u.id=v.teacher_id
                      WHERE v.teacher_id=?
                      ORDER BY v.scheduled_date DESC, v.start_time DESC");
   $st->execute([$teacherId]);
   $virtuals=$st->fetchAll();
 } else {
-  $sql = "SELECT v.*, c.class_name,c.class_code,c.grade_level,c.academic_year, s.subject_name,s.subject_code, u.first_name,u.last_name,u.username
+  $sql = "SELECT v.*, c.class_name,c.class_code,c.grade_level,c.academic_year, s.title AS subject_name,s.subject_code, u.first_name,u.last_name,u.username
           FROM virtual_classes v
           LEFT JOIN classes c ON c.id=v.class_id
-          LEFT JOIN subjects s ON s.id=v.subject_id
+          LEFT JOIN subjects s ON s.subject_id=v.subject_id
           LEFT JOIN users u ON u.id=v.teacher_id
           ORDER BY v.scheduled_date DESC, v.start_time DESC";
   $virtuals=$pdo->query($sql)->fetchAll();

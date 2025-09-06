@@ -7,7 +7,7 @@ $message = '';$error='';
 // Helpers
 // Use COALESCE to treat NULL is_active as active to avoid empty dropdowns on legacy data
 function getClasses(PDO $pdo){return $pdo->query("SELECT id,class_name,class_code,grade_level,academic_year FROM classes WHERE COALESCE(is_active,1)=1 ORDER BY grade_level,class_name")->fetchAll();}
-function getSubjects(PDO $pdo){return $pdo->query("SELECT id,subject_name,subject_code FROM subjects WHERE COALESCE(is_active,1)=1 ORDER BY subject_name")->fetchAll();}
+function getSubjects(PDO $pdo){return $pdo->query("SELECT subject_id AS id, title AS subject_name, subject_code FROM subjects WHERE COALESCE(is_active,1)=1 ORDER BY title")->fetchAll();}
 function getTeachers(PDO $pdo){$s=$pdo->prepare("SELECT id,first_name,last_name,username,email FROM users WHERE role='teacher' AND COALESCE(is_active,1)=1 ORDER BY first_name,last_name");$s->execute();return $s->fetchAll();}
 
 try{
@@ -110,10 +110,10 @@ if (isTeacher()) {
                     ORDER BY c.grade_level,c.class_name");
   $s->execute([$teacherIdSession]);
   $classes=$s->fetchAll();
-  $s=$pdo->prepare("SELECT DISTINCT s.id,s.subject_name,s.subject_code
-                    FROM teacher_assignments ta JOIN subjects s ON s.id=ta.subject_id
+  $s=$pdo->prepare("SELECT DISTINCT s.subject_id AS id, s.title AS subject_name, s.subject_code
+                    FROM teacher_assignments ta JOIN subjects s ON s.subject_id=ta.subject_id
                     WHERE ta.teacher_id=? AND COALESCE(ta.is_active,1)=1 AND COALESCE(s.is_active,1)=1
-                    ORDER BY s.subject_name");
+                    ORDER BY s.title");
   $s->execute([$teacherIdSession]);
   $subjects=$s->fetchAll();
   // Teachers list is only self
@@ -123,17 +123,17 @@ if (isTeacher()) {
 }
 $classesCount=count($classes); $subjectsCount=count($subjects); $teachersCount=count($teachers);
 if (isTeacher()) {
-  $st=$pdo->prepare("SELECT a.*,c.class_name,c.class_code,c.grade_level,c.academic_year,s.subject_name,s.subject_code,u.first_name,u.last_name,u.username
+  $st=$pdo->prepare("SELECT a.*,c.class_name,c.class_code,c.grade_level,c.academic_year,s.title AS subject_name,s.subject_code,u.first_name,u.last_name,u.username
                      FROM assignments a
                      LEFT JOIN classes c ON c.id=a.class_id
-                     LEFT JOIN subjects s ON s.id=a.subject_id
+                     LEFT JOIN subjects s ON s.subject_id=a.subject_id
                      LEFT JOIN users u ON u.id=a.teacher_id
                      WHERE a.teacher_id=?
                      ORDER BY a.created_at DESC,a.due_date ASC,a.due_time ASC");
   $st->execute([$teacherIdSession]);
   $assignments=$st->fetchAll();
 } else {
-  $assignments=$pdo->query("SELECT a.*,c.class_name,c.class_code,c.grade_level,c.academic_year,s.subject_name,s.subject_code,u.first_name,u.last_name,u.username FROM assignments a LEFT JOIN classes c ON c.id=a.class_id LEFT JOIN subjects s ON s.id=a.subject_id LEFT JOIN users u ON u.id=a.teacher_id ORDER BY a.created_at DESC,a.due_date ASC,a.due_time ASC")->fetchAll();
+  $assignments=$pdo->query("SELECT a.*,c.class_name,c.class_code,c.grade_level,c.academic_year,s.title AS subject_name,s.subject_code,u.first_name,u.last_name,u.username FROM assignments a LEFT JOIN classes c ON c.id=a.class_id LEFT JOIN subjects s ON s.subject_id=a.subject_id LEFT JOIN users u ON u.id=a.teacher_id ORDER BY a.created_at DESC,a.due_date ASC,a.due_time ASC")->fetchAll();
 }
 
 include '../components/header.php';

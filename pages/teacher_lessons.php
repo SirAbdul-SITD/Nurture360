@@ -25,7 +25,7 @@ function tClasses(PDO $pdo, int $tid): array {
   return $q->fetchAll();
 }
 function tSubjects(PDO $pdo, int $tid): array {
-  $q=$pdo->prepare('SELECT DISTINCT s.id,s.subject_name,s.subject_code FROM teacher_assignments ta JOIN subjects s ON s.id=ta.subject_id WHERE ta.teacher_id=? AND COALESCE(ta.is_active,1)=1 ORDER BY s.subject_name');
+  $q=$pdo->prepare('SELECT DISTINCT s.subject_id AS id, s.title AS subject_name, s.subject_code FROM teacher_assignments ta JOIN subjects s ON s.subject_id=ta.subject_id WHERE ta.teacher_id=? AND COALESCE(ta.is_active,1)=1 ORDER BY s.title');
   $q->execute([$tid]);
   return $q->fetchAll();
 }
@@ -155,7 +155,7 @@ try {
 // Load filters and list
 if ($isAdmin) {
   $classes = $pdo->query('SELECT id,class_name,class_code,grade_level,academic_year FROM classes ORDER BY grade_level,class_name')->fetchAll();
-  $subjects = $pdo->query('SELECT id,subject_name,subject_code FROM subjects ORDER BY subject_name')->fetchAll();
+  $subjects = $pdo->query('SELECT subject_id AS id, title AS subject_name, subject_code FROM subjects ORDER BY title')->fetchAll();
 } else {
   $classes = tClasses($pdo,$teacherId);
   $subjects = tSubjects($pdo,$teacherId);
@@ -163,7 +163,7 @@ if ($isAdmin) {
 $fClass = isset($_GET['class_id']) ? (int)$_GET['class_id'] : 0;
 $fSubject = isset($_GET['subject_id']) ? (int)$_GET['subject_id'] : 0;
 $params = [];
-$sql = 'SELECT l.*, c.class_name,c.class_code, s.subject_name,s.subject_code FROM lessons l LEFT JOIN classes c ON c.id=l.class_id LEFT JOIN subjects s ON s.id=l.subject_id WHERE 1=1';
+$sql = 'SELECT l.*, c.class_name,c.class_code, s.title AS subject_name, s.subject_code FROM lessons l LEFT JOIN classes c ON c.id=l.class_id LEFT JOIN subjects s ON s.subject_id=l.subject_id WHERE 1=1';
 if ($fClass>0) { $sql .= ' AND l.class_id = ?'; $params[] = $fClass; }
 if ($fSubject>0) { $sql .= ' AND l.subject_id = ?'; $params[] = $fSubject; }
 $sql .= $isAdmin ? '' : ' AND EXISTS (SELECT 1 FROM teacher_assignments ta WHERE ta.teacher_id=? AND ta.class_id=l.class_id AND ta.subject_id=l.subject_id AND COALESCE(ta.is_active,1)=1)';
@@ -276,6 +276,7 @@ $createForm = '
     <div class="form-group">
       <label for="create_description" class="sr-only">Description</label>
       <textarea class="form-control bg-light" id="create_description" name="description" rows="6" style="display:none;"></textarea>
+      <label for="create_description_quill" class="form-label" style="display:block; margin:6px 0 6px; font-weight:600;">Description</label>
       <div id="create_description_quill" style="height: 400px; border: 1px solid #ccc; border-radius: 4px;"></div>
     </div>
   </div>
@@ -283,6 +284,7 @@ $createForm = '
     <div class="form-group">
       <label for="create_vocabulary" class="sr-only">Vocabulary</label>
       <textarea class="form-control bg-light" id="create_vocabulary" name="vocabulary" rows="6" style="display:none;"></textarea>
+      <label for="create_vocabulary_quill" class="form-label" style="display:block; margin:6px 0 6px; font-weight:600;">Vocabulary</label>
       <div id="create_vocabulary_quill" style="height: 400px; border: 1px solid #ccc; border-radius: 4px;"></div>
     </div>
   </div>
@@ -311,6 +313,7 @@ $editForm = '
     <div class="form-group">
       <label for="edit_description" class="sr-only">Description</label>
       <textarea class="form-control bg-light" id="edit_description" name="description" rows="6" style="display:none;"></textarea>
+      <label for="edit_description_quill" class="form-label" style="display:block; margin:6px 0 6px; font-weight:600;">Description</label>
       <div id="edit_description_quill" style="height: 400px; border: 1px solid #ccc; border-radius: 4px;"></div>
     </div>
   </div>
@@ -318,6 +321,7 @@ $editForm = '
     <div class="form-group">
       <label for="edit_vocabulary" class="sr-only">Vocabulary</label>
       <textarea class="form-control bg-light" id="edit_vocabulary" name="vocabulary" rows="6" style="display:none;"></textarea>
+      <label for="edit_vocabulary_quill" class="form-label" style="display:block; margin:6px 0 6px; font-weight:600;">Vocabulary</label>
       <div id="edit_vocabulary_quill" style="height: 400px; border: 1px solid #ccc; border-radius: 4px;"></div>
     </div>
   </div>

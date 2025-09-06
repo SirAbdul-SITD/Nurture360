@@ -6,10 +6,10 @@ $id=(int)($_GET['id']??0); if($id<=0){ redirect('./content_pages.php'); }
 
 $page=null; $error='';
 try{
-  $st=$pdo->prepare("SELECT cp.*, c.class_name,c.class_code, s.subject_name,s.subject_code, u.first_name,u.last_name,u.username
+  $st=$pdo->prepare("SELECT cp.*, c.class_name,c.class_code, s.title AS subject_name,s.subject_code, u.first_name,u.last_name,u.username
                      FROM content_pages cp
                      LEFT JOIN classes c ON c.id=cp.class_id
-                     LEFT JOIN subjects s ON s.id=cp.subject_id
+                     LEFT JOIN subjects s ON s.subject_id=cp.subject_id
                      LEFT JOIN users u ON u.id=cp.teacher_id
                      WHERE cp.id=?");
   $st->execute([$id]);

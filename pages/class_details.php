@@ -18,11 +18,11 @@ $page_title = 'Class Details — ' . $class['class_name'];
 // Assigned subjects (via class_subjects)
 $subjects = [];
 try {
-  $q = $pdo->prepare("SELECT cs.id AS class_subject_id, s.id, s.subject_name, s.subject_code, s.description
+  $q = $pdo->prepare("SELECT cs.id AS class_subject_id, s.subject_id AS id, s.title AS subject_name, s.subject_code, s.description
                       FROM class_subjects cs
-                      JOIN subjects s ON s.id = cs.subject_id
+                      JOIN subjects s ON s.subject_id = cs.subject_id
                       WHERE cs.class_id = ?
-                      ORDER BY s.subject_name");
+                      ORDER BY s.title");
   $q->execute([$classId]);
   $subjects = $q->fetchAll();
 } catch (Throwable $e) {}
@@ -53,12 +53,12 @@ try {
 $teachers = [];
 try {
   $q = $pdo->prepare("SELECT ta.id as assignment_id, u.id as teacher_id, u.first_name, u.last_name, u.username, u.profile_image,
-                              s.subject_name, s.subject_code, ta.academic_year
+                              s.title AS subject_name, s.subject_code, ta.academic_year
                        FROM teacher_assignments ta
                        JOIN users u ON u.id = ta.teacher_id
-                       JOIN subjects s ON s.id = ta.subject_id
+                       JOIN subjects s ON s.subject_id = ta.subject_id
                        WHERE ta.class_id = ? AND ta.is_active = 1
-                       ORDER BY u.first_name, u.last_name, s.subject_name");
+                       ORDER BY u.first_name, u.last_name, s.title");
   $q->execute([$classId]);
   $rows = $q->fetchAll();
   // Group by teacher -> subjects
@@ -343,7 +343,7 @@ include '../components/header.php';
   // Prepare data for Add modals
   try {
     // Subjects not yet assigned to this class
-    $stmt = $pdo->prepare("SELECT id, subject_name, subject_code FROM subjects WHERE is_active = 1 AND id NOT IN (SELECT subject_id FROM class_subjects WHERE class_id = ?)");
+    $stmt = $pdo->prepare("SELECT subject_id AS id, title AS subject_name, subject_code FROM subjects WHERE is_active = 1 AND subject_id NOT IN (SELECT subject_id FROM class_subjects WHERE class_id = ?)");
     $stmt->execute([$classId]);
     $availableSubjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
   } catch (Throwable $e) { $availableSubjects = []; }
@@ -380,7 +380,7 @@ include '../components/header.php';
 
   // Reuse subjects list for teacher modal as well (use all active subjects)
   try {
-    $stmt = $pdo->query("SELECT id, subject_name, subject_code FROM subjects WHERE is_active = 1 ORDER BY subject_name");
+    $stmt = $pdo->query("SELECT subject_id AS id, title AS subject_name, subject_code FROM subjects WHERE is_active = 1 ORDER BY title");
     $allSubjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
   } catch (Throwable $e) { $allSubjects = []; }
 

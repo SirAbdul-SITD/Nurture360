@@ -17,19 +17,19 @@ try {
     // Get available subjects (not assigned to any teacher)
     $stmt = $pdo->prepare("
         SELECT 
-            s.id,
-            s.subject_name,
+            s.subject_id AS id,
+            s.title AS subject_name,
             s.subject_code,
             s.grade_level,
             s.description,
             s.credits
         FROM subjects s
         WHERE s.is_active = 1 
-        AND s.id NOT IN (
+        AND s.subject_id NOT IN (
             SELECT DISTINCT subject_id 
             FROM teacher_subject_assignments
         )
-        ORDER BY s.grade_level, s.subject_name
+        ORDER BY s.grade_level, s.title
     ");
     $stmt->execute();
     $subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);

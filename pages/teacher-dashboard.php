@@ -22,21 +22,21 @@ try {
     $pdo = getDBConnection();
 
     // Assigned classes & subjects
-    $stmt = $pdo->prepare("SELECT ta.id, c.class_name, c.class_code, c.grade_level, s.subject_name, ta.academic_year
+    $stmt = $pdo->prepare("SELECT ta.id, c.class_name, c.class_code, c.grade_level, s.title AS subject_name, ta.academic_year
                            FROM teacher_assignments ta
                            JOIN classes c ON ta.class_id = c.id
-                           JOIN subjects s ON ta.subject_id = s.id
+                           JOIN subjects s ON ta.subject_id = s.subject_id
                            WHERE ta.teacher_id = ? AND ta.is_active = 1
-                           ORDER BY c.grade_level, c.class_name, s.subject_name");
+                           ORDER BY c.grade_level, c.class_name, s.title");
     $stmt->execute([$teacher_id]);
     $assigned_classes = $stmt->fetchAll();
 
     // Today's schedule from timetable
     $dayOfWeek = strtolower(date('l')); // monday..sunday
-    $stmt = $pdo->prepare("SELECT t.id, c.class_name, s.subject_name, t.start_time, t.end_time, t.room_number
+    $stmt = $pdo->prepare("SELECT t.id, c.class_name, s.title AS subject_name, t.start_time, t.end_time, t.room_number
                            FROM timetable t
                            JOIN classes c ON t.class_id = c.id
-                           JOIN subjects s ON t.subject_id = s.id
+                           JOIN subjects s ON t.subject_id = s.subject_id
                            WHERE t.teacher_id = ? AND t.day_of_week = ? AND t.is_active = 1
                            ORDER BY t.start_time");
     $stmt->execute([$teacher_id, $dayOfWeek]);
@@ -58,10 +58,10 @@ try {
     // (Removed) pending grading queries: not needed for teacher dashboard now
 
     // Upcoming virtual classes
-    $stmt = $pdo->prepare("SELECT vc.id, vc.title, c.class_name, s.subject_name, vc.scheduled_date, vc.start_time, vc.end_time, vc.meeting_link
+    $stmt = $pdo->prepare("SELECT vc.id, vc.title, c.class_name, s.title AS subject_name, vc.scheduled_date, vc.start_time, vc.end_time, vc.meeting_link
                            FROM virtual_classes vc
                            JOIN classes c ON vc.class_id = c.id
-                           JOIN subjects s ON vc.subject_id = s.id
+                           JOIN subjects s ON vc.subject_id = s.subject_id
                            WHERE vc.teacher_id = ? AND vc.is_active = 1 AND vc.scheduled_date >= CURDATE()
                            ORDER BY vc.scheduled_date, vc.start_time
                            LIMIT 5");
@@ -69,10 +69,10 @@ try {
     $upcoming_virtual_classes = $stmt->fetchAll();
 
     // Recent content pages created by teacher
-    $stmt = $pdo->prepare("SELECT cp.id, cp.title, cp.updated_at, c.class_name, s.subject_name, cp.is_published
+    $stmt = $pdo->prepare("SELECT cp.id, cp.title, cp.updated_at, c.class_name, s.title AS subject_name, cp.is_published
                            FROM content_pages cp
                            LEFT JOIN classes c ON cp.class_id = c.id
-                           LEFT JOIN subjects s ON cp.subject_id = s.id
+                           LEFT JOIN subjects s ON cp.subject_id = s.subject_id
                            WHERE cp.teacher_id = ?
                            ORDER BY cp.updated_at DESC
                            LIMIT 5");

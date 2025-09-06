@@ -10,10 +10,10 @@ $studentId = (int)($_GET['student_id'] ?? 0);
 if ($testId <= 0 || $studentId <= 0) { redirect('./tests.php'); }
 
 // Load test
-$st = $pdo->prepare("SELECT t.*, c.class_name,c.class_code, s.subject_name,s.subject_code, u.first_name,u.last_name,u.username
+$st = $pdo->prepare("SELECT t.*, c.class_name,c.class_code, s.title AS subject_name,s.subject_code, u.first_name,u.last_name,u.username
                      FROM tests t
                      LEFT JOIN classes c ON c.id=t.class_id
-                     LEFT JOIN subjects s ON s.id=t.subject_id
+                     LEFT JOIN subjects s ON s.subject_id=t.subject_id
                      LEFT JOIN users u ON u.id=t.teacher_id
                      WHERE t.id=?");
 $st->execute([$testId]);

@@ -16,11 +16,11 @@ $classes = $classesStmt->fetchAll(PDO::FETCH_ASSOC);
 
 $subjectsByClass = [];
 if ($classes) {
-    $subStmt = $pdo->prepare("SELECT DISTINCT ta.class_id, s.id AS subject_id, s.subject_name, s.subject_code
+    $subStmt = $pdo->prepare("SELECT DISTINCT ta.class_id, s.subject_id AS subject_id, s.title AS subject_name, s.subject_code
                                FROM teacher_assignments ta
-                               JOIN subjects s ON s.id = ta.subject_id
+                               JOIN subjects s ON s.subject_id = ta.subject_id
                                WHERE ta.teacher_id = ? AND ta.class_id = ? AND COALESCE(ta.is_active,1)=1 AND COALESCE(s.is_active,1)=1
-                               ORDER BY s.subject_name");
+                               ORDER BY s.title");
     foreach ($classes as $c) {
         $subStmt->execute([$teacherId, (int)$c['id']]);
         $subjectsByClass[$c['id']] = $subStmt->fetchAll(PDO::FETCH_ASSOC);

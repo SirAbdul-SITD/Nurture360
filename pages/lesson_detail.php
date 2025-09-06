@@ -13,10 +13,10 @@ $lessonId = isset($_GET['lesson_id']) ? (int)$_GET['lesson_id'] : 0;
 if ($lessonId <= 0) { redirect('../dashboard/index.php'); }
 
 // Fetch lesson with class and subject
-$stmt = $pdo->prepare('SELECT l.*, c.class_name, c.class_code, c.grade_level, c.academic_year, s.subject_name, s.subject_code
+$stmt = $pdo->prepare('SELECT l.*, c.class_name, c.class_code, c.grade_level, c.academic_year, s.title AS subject_name, s.subject_code
                        FROM lessons l
                        LEFT JOIN classes c ON c.id = l.class_id
-                       LEFT JOIN subjects s ON s.id = l.subject_id
+                       LEFT JOIN subjects s ON s.subject_id = l.subject_id
                        WHERE l.lesson_id = ?');
 $stmt->execute([$lessonId]);
 $L = $stmt->fetch();
@@ -72,10 +72,31 @@ include '../components/header.php';
           <div><?php echo $L['description'] ?? ''; ?></div>
         </section>
 
+        <?php if (!empty($L['vocabulary'])): ?>
+        <section>
+          <h3><i class="fas fa-book"></i> Vocabulary</h3>
+          <div><?php echo $L['vocabulary'] ?? ''; ?></div>
+        </section>
+        <?php endif; ?>
+
         <?php if (!empty($L['content'])): ?>
         <section>
-          <h3><i class="fas fa-file-alt"></i> Content</h3>
-          <div><?php echo nl2br(htmlspecialchars($L['content'])); ?></div>
+          <h3><i class="fas fa-file"></i> Content</h3>
+          <?php
+            $contentHref = (strpos($L['content'],'http')===0)? $L['content'] : ('../uploads/resources/'.basename($L['content']));
+            $contentFileName = basename(parse_url($contentHref, PHP_URL_PATH) ?? $contentHref);
+          ?>
+          <div class="teachers-grid" style="grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); max-width: 520px;">
+            <div class="teacher-card" style="padding:12px 14px;">
+              <div class="teacher-avatar"><i class="fas fa-file"></i></div>
+              <div class="teacher-name" style="white-space: normal; word-break: break-word; overflow-wrap: anywhere;"><strong title="<?php echo htmlspecialchars($contentFileName); ?>"><?php echo htmlspecialchars($contentFileName); ?></strong></div>
+              <div class="teacher-username">Content File</div>
+              <div class="teacher-card-actions action-buttons centered">
+                <a class="btn btn-sm btn-secondary" href="<?php echo htmlspecialchars($contentHref); ?>" target="_blank" title="View"><i class="fas fa-eye"></i></a>
+                <a class="btn btn-sm btn-primary" href="<?php echo htmlspecialchars($contentHref); ?>" download title="Download"><i class="fas fa-download"></i></a>
+              </div>
+            </div>
+          </div>
         </section>
         <?php endif; ?>
 
@@ -98,26 +119,7 @@ include '../components/header.php';
         </section>
         <?php endif; ?>
 
-        <?php if (!empty($L['vocabulary'])): ?>
-        <section>
-          <h3><i class="fas fa-book"></i> Vocabulary</h3>
-          <?php
-            $vocabHref = (strpos($L['vocabulary'],'http')===0)? $L['vocabulary'] : ('../uploads/resources/'.basename($L['vocabulary']));
-            $fileName = basename(parse_url($vocabHref, PHP_URL_PATH) ?? $vocabHref);
-          ?>
-          <div class="teachers-grid" style="grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); max-width: 520px;">
-            <div class="teacher-card" style="padding:12px 14px;">
-              <div class="teacher-avatar"><i class="fas fa-file-alt"></i></div>
-              <div class="teacher-name" style="white-space: normal; word-break: break-word; overflow-wrap: anywhere;"><strong title="<?php echo htmlspecialchars($fileName); ?>"><?php echo htmlspecialchars($fileName); ?></strong></div>
-              <div class="teacher-username">Vocabulary</div>
-              <div class="teacher-card-actions action-buttons centered">
-                <a class="btn btn-sm btn-secondary" href="<?php echo htmlspecialchars($vocabHref); ?>" target="_blank" title="View"><i class="fas fa-eye"></i></a>
-                <a class="btn btn-sm btn-primary" href="<?php echo htmlspecialchars($vocabHref); ?>" download title="Download"><i class="fas fa-download"></i></a>
-              </div>
-            </div>
-          </div>
-        </section>
-        <?php endif; ?>
+        
 
         <?php if (!$isSupervisorRole): ?>
         <section>
